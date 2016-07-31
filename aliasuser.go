@@ -13,6 +13,13 @@ type AliasUser struct {
 	targets []string
 }
 
+// AliasUserSlice attaches the methods of sort.Interface to []*AliasUser.
+type AliasUserSlice []*AliasUser
+
+func (p AliasUserSlice) Len() int           { return len(p) }
+func (p AliasUserSlice) Less(i, j int) bool { return p[i].Name() < p[j].Name() }
+func (p AliasUserSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+
 // NewAliasUser creates a new AliasUser instance.
 func NewAliasUser(name string, targets []string) (*AliasUser, error) {
 	if !validAliasUserName(name) {
