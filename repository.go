@@ -69,6 +69,10 @@ func (r *Repository) Domain(domainName string) (*Domain, error) {
 
 	fileInfo, err := os.Stat(filepath.Join(r.DirMailDataPath, domainName))
 	if err != nil {
+		if err.(*os.PathError).Err == syscall.ENOENT {
+			return nil, nil
+		}
+
 		return nil, err
 	}
 
@@ -207,6 +211,10 @@ func (r *Repository) User(domainName, userName string) (*User, error) {
 
 	fileInfo, err := os.Stat(filepath.Join(r.DirMailDataPath, domainName, userName))
 	if err != nil {
+		if err.(*os.PathError).Err == syscall.ENOENT {
+			return nil, nil
+		}
+
 		return nil, err
 	}
 
