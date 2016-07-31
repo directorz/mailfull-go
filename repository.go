@@ -296,7 +296,7 @@ func (r *Repository) userForwards(domainName, userName string) ([]string, error)
 	file, err := os.Open(filepath.Join(r.DirMailDataPath, domainName, userName, FileNameUserForwards))
 	if err != nil {
 		if err.(*os.PathError).Err == syscall.ENOENT {
-			return []string{}, nil
+			return nil, nil
 		}
 
 		return nil, err
