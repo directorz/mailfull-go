@@ -273,12 +273,16 @@ func (r *Repository) usersHashedPassword(domainName string) (map[string]string, 
 
 // userForwards returns a string slice of forwards that the input name has.
 func (r *Repository) userForwards(domainName, userName string) ([]string, error) {
-	user, err := r.User(domainName, userName)
+	domain, err := r.Domain(domainName)
 	if err != nil {
 		return nil, err
 	}
-	if user == nil {
-		return nil, ErrUserNotExist
+	if domain == nil {
+		return nil, ErrDomainNotExist
+	}
+
+	if !validUserName(userName) {
+		return nil, ErrInvalidUserName
 	}
 
 	file, err := os.Open(filepath.Join(r.DirMailDataPath, domainName, userName, FileNameUserForwards))
