@@ -1,6 +1,12 @@
 package mailfull
 
-import "errors"
+import (
+	"bufio"
+	"errors"
+	"os"
+	"path/filepath"
+	"strings"
+)
 
 // Errors for parameter.
 var (
@@ -52,4 +58,62 @@ func (au *AliasUser) Name() string {
 // Targets returns targets.
 func (au *AliasUser) Targets() []string {
 	return au.targets
+}
+
+// AliasUsers returns a AliasUser slice.
+func (r *Repository) AliasUsers(domainName string) ([]*AliasUser, error) {
+	domain, err := r.Domain(domainName)
+	if err != nil {
+		return nil, err
+	}
+	if domain == nil {
+		return nil, ErrDomainNotExist
+	}
+
+	file, err := os.Open(filepath.Join(r.DirMailDataPath, domainName, FileNameAliasUsers))
+	if err != nil {
+		return nil, err
+	}
+
+	aliasUsers := make([]*AliasUser, 0, 50)
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		words := strings.Split(scanner.Text(), ":")
+		if len(words) != 2 {
+			return nil, ErrInvalidFormatAliasUsers
+		}
+
+		name := words[0]
+		targets := strings.Split(words[1], ",")
+
+		aliasUser, err := NewAliasUser(name, targets)
+		if err != nil {
+			return nil, err
+		}
+
+		aliasUsers = append(aliasUsers, aliasUser)
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return aliasUsers, nil
+}
+
+// AliasUser returns a AliasUser of the input name.
+func (r *Repository) AliasUser(domainName, aliasUserName string) (*AliasUser, error) {
+	aliasUsers, err := r.AliasUsers(domainName)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, aliasUser := range aliasUsers {
+		if aliasUser.Name() == aliasUserName {
+			return aliasUser, nil
+		}
+	}
+
+	return nil, nil
 }

@@ -16,6 +16,16 @@ var (
 	ErrRepositoryExist   = errors.New("a Mailfull repository exists")
 )
 
+// Errors for the operation of the Repository.
+var (
+	ErrDomainNotExist = errors.New("Domain: not exist")
+	ErrUserNotExist   = errors.New("User: not exist")
+
+	ErrInvalidFormatUsersPassword = errors.New("User: password file invalid format")
+	ErrInvalidFormatAliasDomain   = errors.New("AliasDomain: file invalid format")
+	ErrInvalidFormatAliasUsers    = errors.New("AliasUsers: file invalid format")
+)
+
 // RepositoryConfig is used to configure a Repository.
 type RepositoryConfig struct {
 	DirDatabasePath string `toml:"dir_database"`
@@ -34,6 +44,20 @@ func DefaultRepositoryConfig() *RepositoryConfig {
 	}
 
 	return c
+}
+
+// Repository represents a Repository.
+type Repository struct {
+	*RepositoryConfig
+}
+
+// NewRepository creates a new Repository instance.
+func NewRepository(c *RepositoryConfig) (*Repository, error) {
+	r := &Repository{
+		RepositoryConfig: c,
+	}
+
+	return r, nil
 }
 
 // OpenRepository opens a Repository and creates a new Repository instance.
