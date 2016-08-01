@@ -47,6 +47,10 @@ func main() {
 			meta.SubCmdName = c.Subcommand()
 			return &command.DomainListCommand{Meta: meta}, nil
 		},
+		"commit": func() (cli.Command, error) {
+			meta.SubCmdName = c.Subcommand()
+			return &command.CommitCommand{Meta: meta}, nil
+		},
 	}
 
 	exitCode, err := c.Run()
