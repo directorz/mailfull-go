@@ -34,6 +34,16 @@ type RepositoryConfig struct {
 	Groupname       string `toml:"groupname"`
 }
 
+// Normalize normalizes paramaters of the RepositoryConfig.
+func (c *RepositoryConfig) Normalize(rootPath string) {
+	if !filepath.IsAbs(c.DirDatabasePath) {
+		c.DirDatabasePath = filepath.Join(rootPath, c.DirDatabasePath)
+	}
+	if !filepath.IsAbs(c.DirMailDataPath) {
+		c.DirMailDataPath = filepath.Join(rootPath, c.DirMailDataPath)
+	}
+}
+
 // DefaultRepositoryConfig returns a RepositoryConfig with default parameter.
 func DefaultRepositoryConfig() *RepositoryConfig {
 	c := &RepositoryConfig{
@@ -111,12 +121,7 @@ func OpenRepository(basePath string) (*Repository, error) {
 		return nil, err
 	}
 
-	if !filepath.IsAbs(c.DirDatabasePath) {
-		c.DirDatabasePath = filepath.Join(rootPath, c.DirDatabasePath)
-	}
-	if !filepath.IsAbs(c.DirMailDataPath) {
-		c.DirMailDataPath = filepath.Join(rootPath, c.DirMailDataPath)
-	}
+	c.Normalize(rootPath)
 
 	r, err := NewRepository(c)
 	if err != nil {
@@ -178,12 +183,7 @@ func InitRepository(rootPath string) error {
 		return err
 	}
 
-	if !filepath.IsAbs(c.DirDatabasePath) {
-		c.DirDatabasePath = filepath.Join(rootPath, c.DirDatabasePath)
-	}
-	if !filepath.IsAbs(c.DirMailDataPath) {
-		c.DirMailDataPath = filepath.Join(rootPath, c.DirMailDataPath)
-	}
+	c.Normalize(rootPath)
 
 	fi, err = os.Stat(c.DirDatabasePath)
 	if err != nil {
