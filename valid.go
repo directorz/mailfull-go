@@ -18,35 +18,35 @@ var (
 
 // validDomainName returns true if the input is correct format.
 func validDomainName(name string) bool {
-	return regexp.MustCompile(`^([A-Za-z0-9][A-Za-z0-9\-]{1,61}[A-Za-z0-9]\.)*[A-Za-z]+$`).MatchString(name)
+	return regexp.MustCompile(`^([A-Za-z0-9\-]+\.)*[A-Za-z]+$`).MatchString(name)
 }
 
 // validAliasDomainName returns true if the input is correct format.
 func validAliasDomainName(name string) bool {
-	return regexp.MustCompile(`^([A-Za-z0-9][A-Za-z0-9\-]{1,61}[A-Za-z0-9]\.)*[A-Za-z]+$`).MatchString(name)
+	return regexp.MustCompile(`^([A-Za-z0-9\-]+\.)*[A-Za-z]+$`).MatchString(name)
 }
 
 // validAliasDomainTarget returns true if the input is correct format.
 func validAliasDomainTarget(target string) bool {
-	return regexp.MustCompile(`^([A-Za-z0-9][A-Za-z0-9\-]{1,61}[A-Za-z0-9]\.)*[A-Za-z]+$`).MatchString(target)
+	return regexp.MustCompile(`^([A-Za-z0-9\-]+\.)*[A-Za-z]+$`).MatchString(target)
 }
 
 // validUserName returns true if the input is correct format.
 func validUserName(name string) bool {
-	return regexp.MustCompile(`^[^\s]+$`).MatchString(name)
+	return regexp.MustCompile(`^[^\s@]+$`).MatchString(name)
 }
 
 // validAliasUserName returns true if the input is correct format.
 func validAliasUserName(name string) bool {
-	return regexp.MustCompile(`^[^\s]+$`).MatchString(name)
+	return regexp.MustCompile(`^[^\s@]+$`).MatchString(name)
 }
 
 // validAliasUserTarget returns true if the input is correct format.
 func validAliasUserTarget(target string) bool {
-	return regexp.MustCompile(`^[^\s]+@([A-Za-z0-9][A-Za-z0-9\-]{1,61}[A-Za-z0-9]\.)*[A-Za-z]+$`).MatchString(target)
+	return regexp.MustCompile(`^[^\s@]+@([A-Za-z0-9\-]+\.)*[A-Za-z]+$`).MatchString(target)
 }
 
 // validCatchAllUserName returns true if the input is correct format.
 func validCatchAllUserName(name string) bool {
-	return regexp.MustCompile(`^[^\s]+$`).MatchString(name)
+	return regexp.MustCompile(`^[^\s@]+$`).MatchString(name)
 }
