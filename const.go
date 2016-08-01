@@ -10,4 +10,11 @@ const (
 	FileNameUserForwards  = ".forward"
 	FileNameAliasUsers    = ".valiases"
 	FileNameCatchAllUser  = ".vcatchall"
+
+	FileNameDbDomains      = "domains"
+	FileNameDbDestinations = "destinations"
+	FileNameDbMaildirs     = "maildirs"
+	FileNameDbLocaltable   = "localtable"
+	FileNameDbForwards     = "forwards"
+	FileNameDbPasswords    = "vpasswd"
 )
