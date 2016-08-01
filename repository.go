@@ -32,6 +32,8 @@ type RepositoryConfig struct {
 	DirMailDataPath string `toml:"dir_maildata"`
 	Username        string `toml:"username"`
 	Groupname       string `toml:"groupname"`
+	CmdPostalias    string `toml:"postalias"`
+	CmdPostmap      string `toml:"postmap"`
 }
 
 // Normalize normalizes paramaters of the RepositoryConfig.
@@ -42,6 +44,18 @@ func (c *RepositoryConfig) Normalize(rootPath string) {
 	if !filepath.IsAbs(c.DirMailDataPath) {
 		c.DirMailDataPath = filepath.Join(rootPath, c.DirMailDataPath)
 	}
+
+	if filepath.Base(c.CmdPostalias) != c.CmdPostalias {
+		if !filepath.IsAbs(c.CmdPostalias) {
+			c.CmdPostalias = filepath.Join(rootPath, c.CmdPostalias)
+		}
+	}
+
+	if filepath.Base(c.CmdPostmap) != c.CmdPostmap {
+		if !filepath.IsAbs(c.CmdPostmap) {
+			c.CmdPostmap = filepath.Join(rootPath, c.CmdPostmap)
+		}
+	}
 }
 
 // DefaultRepositoryConfig returns a RepositoryConfig with default parameter.
@@ -51,6 +65,8 @@ func DefaultRepositoryConfig() *RepositoryConfig {
 		DirMailDataPath: "./domains",
 		Username:        "mailfull",
 		Groupname:       "mailfull",
+		CmdPostalias:    "postalias",
+		CmdPostmap:      "postmap",
 	}
 
 	return c
