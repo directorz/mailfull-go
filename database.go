@@ -67,11 +67,15 @@ func (r *Repository) generateDbDomains(md *MailData) error {
 	defer dbDomains.Close()
 
 	for _, domain := range md.Domains {
-		fmt.Fprintf(dbDomains, "%s virtual\n", domain.Name())
+		if _, err := fmt.Fprintf(dbDomains, "%s virtual\n", domain.Name()); err != nil {
+			return err
+		}
 	}
 
 	for _, aliasDomain := range md.AliasDomains {
-		fmt.Fprintf(dbDomains, "%s virtual\n", aliasDomain.Name())
+		if _, err := fmt.Fprintf(dbDomains, "%s virtual\n", aliasDomain.Name()); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -96,24 +100,34 @@ func (r *Repository) generateDbDestinations(md *MailData) error {
 			}
 
 			if len(user.Forwards()) > 0 {
-				fmt.Fprintf(dbDestinations, "%s@%s %s|%s\n", userName, domain.Name(), underscoredDomainName, user.Name())
+				if _, err := fmt.Fprintf(dbDestinations, "%s@%s %s|%s\n", userName, domain.Name(), underscoredDomainName, user.Name()); err != nil {
+					return err
+				}
 			} else {
-				fmt.Fprintf(dbDestinations, "%s@%s %s@%s\n", userName, domain.Name(), user.Name(), domain.Name())
+				if _, err := fmt.Fprintf(dbDestinations, "%s@%s %s@%s\n", userName, domain.Name(), user.Name(), domain.Name()); err != nil {
+					return err
+				}
 			}
 
 			for _, aliasDomain := range md.AliasDomains {
 				if aliasDomain.Target() == domain.Name() {
-					fmt.Fprintf(dbDestinations, "%s@%s %s@%s\n", userName, aliasDomain.Name(), user.Name(), domain.Name())
+					if _, err := fmt.Fprintf(dbDestinations, "%s@%s %s@%s\n", userName, aliasDomain.Name(), user.Name(), domain.Name()); err != nil {
+						return err
+					}
 				}
 			}
 		}
 
 		for _, aliasUser := range domain.AliasUsers {
-			fmt.Fprintf(dbDestinations, "%s@%s %s\n", aliasUser.Name(), domain.Name(), strings.Join(aliasUser.Targets(), ","))
+			if _, err := fmt.Fprintf(dbDestinations, "%s@%s %s\n", aliasUser.Name(), domain.Name(), strings.Join(aliasUser.Targets(), ",")); err != nil {
+				return err
+			}
 
 			for _, aliasDomain := range md.AliasDomains {
 				if aliasDomain.Target() == domain.Name() {
-					fmt.Fprintf(dbDestinations, "%s@%s %s@%s\n", aliasUser.Name(), aliasDomain.Name(), aliasUser.Name(), domain.Name())
+					if _, err := fmt.Fprintf(dbDestinations, "%s@%s %s@%s\n", aliasUser.Name(), aliasDomain.Name(), aliasUser.Name(), domain.Name()); err != nil {
+						return err
+					}
 				}
 			}
 		}
@@ -131,7 +145,9 @@ func (r *Repository) generateDbMaildirs(md *MailData) error {
 
 	for _, domain := range md.Domains {
 		for _, user := range domain.Users {
-			fmt.Fprintf(dbMaildirs, "%s@%s %s/%s/Maildir/\n", user.Name(), domain.Name(), domain.Name(), user.Name())
+			if _, err := fmt.Fprintf(dbMaildirs, "%s@%s %s/%s/Maildir/\n", user.Name(), domain.Name(), domain.Name(), user.Name()); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -151,7 +167,9 @@ func (r *Repository) generateDbLocaltable(md *MailData) error {
 		escapedDomainName = strings.Replace(escapedDomainName, `-`, `_`, -1)
 		escapedDomainName = strings.Replace(escapedDomainName, `.`, `\.`, -1)
 
-		fmt.Fprintf(dbLocaltable, "/^%s\\|.*$/ local\n", escapedDomainName)
+		if _, err := fmt.Fprintf(dbLocaltable, "/^%s\\|.*$/ local\n", escapedDomainName); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -171,15 +189,21 @@ func (r *Repository) generateDbForwards(md *MailData) error {
 
 		for _, user := range domain.Users {
 			if len(user.Forwards()) > 0 {
-				fmt.Fprintf(dbForwards, "%s|%s:%s\n", underscoredDomainName, user.Name(), strings.Join(user.Forwards(), ","))
+				if _, err := fmt.Fprintf(dbForwards, "%s|%s:%s\n", underscoredDomainName, user.Name(), strings.Join(user.Forwards(), ",")); err != nil {
+					return err
+				}
 			} else {
-				fmt.Fprintf(dbForwards, "%s|%s:/dev/null\n", underscoredDomainName, user.Name())
+				if _, err := fmt.Fprintf(dbForwards, "%s|%s:/dev/null\n", underscoredDomainName, user.Name()); err != nil {
+					return err
+				}
 			}
 		}
 	}
 
 	// drop real user
-	fmt.Fprintf(dbForwards, "%s:/dev/null\n", r.Username)
+	if _, err := fmt.Fprintf(dbForwards, "%s:/dev/null\n", r.Username); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -193,7 +217,9 @@ func (r *Repository) generateDbPasswords(md *MailData) error {
 
 	for _, domain := range md.Domains {
 		for _, user := range domain.Users {
-			fmt.Fprintf(dbPasswords, "%s@%s:%s\n", user.Name(), domain.Name(), user.HashedPassword())
+			if _, err := fmt.Fprintf(dbPasswords, "%s@%s:%s\n", user.Name(), domain.Name(), user.HashedPassword()); err != nil {
+				return err
+			}
 		}
 	}
 
