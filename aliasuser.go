@@ -74,6 +74,7 @@ func (r *Repository) AliasUsers(domainName string) ([]*AliasUser, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
 
 	aliasUsers := make([]*AliasUser, 0, 50)
 

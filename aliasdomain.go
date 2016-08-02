@@ -53,6 +53,7 @@ func (r *Repository) AliasDomains() ([]*AliasDomain, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
 
 	aliasDomains := make([]*AliasDomain, 0, 10)
 

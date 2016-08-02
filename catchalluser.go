@@ -43,6 +43,7 @@ func (r *Repository) CatchAllUser(domainName string) (*CatchAllUser, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
 	scanner.Scan()

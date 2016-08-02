@@ -169,6 +169,7 @@ func (r *Repository) usersHashedPassword(domainName string) (map[string]string, 
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
 
 	hashedPasswords := map[string]string{}
 
@@ -214,6 +215,7 @@ func (r *Repository) userForwards(domainName, userName string) ([]string, error)
 
 		return nil, err
 	}
+	defer file.Close()
 
 	forwards := make([]string, 0, 5)
 
