@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"syscall"
+	"time"
 )
 
 // Domain represents a Domain.
@@ -94,4 +95,78 @@ func (r *Repository) Domain(domainName string) (*Domain, error) {
 	}
 
 	return domain, nil
+}
+
+// DomainCreate creates the input Domain.
+func (r *Repository) DomainCreate(domain *Domain) error {
+	existDomain, err := r.Domain(domain.Name())
+	if err != nil {
+		return err
+	}
+	if existDomain != nil {
+		return ErrDomainAlreadyExist
+	}
+	existAliasDomain, err := r.AliasDomain(domain.Name())
+	if err != nil {
+		return err
+	}
+	if existAliasDomain != nil {
+		return ErrAliasDomainAlreadyExist
+	}
+
+	domainDirPath := filepath.Join(r.DirMailDataPath, domain.Name())
+
+	if err := os.Mkdir(domainDirPath, 0777); err != nil {
+		return err
+	}
+
+	usersPasswordFile, err := os.Create(filepath.Join(domainDirPath, FileNameUsersPassword))
+	if err != nil {
+		return err
+	}
+	usersPasswordFile.Close()
+
+	aliasUsersFile, err := os.Create(filepath.Join(domainDirPath, FileNameAliasUsers))
+	if err != nil {
+		return err
+	}
+	aliasUsersFile.Close()
+
+	catchAllUserFile, err := os.Create(filepath.Join(domainDirPath, FileNameCatchAllUser))
+	if err != nil {
+		return err
+	}
+	catchAllUserFile.Close()
+
+	return nil
+}
+
+// DomainRemove removes a Domain of the input name.
+func (r *Repository) DomainRemove(domainName string) error {
+	existDomain, err := r.Domain(domainName)
+	if err != nil {
+		return err
+	}
+	if existDomain == nil {
+		return ErrDomainNotExist
+	}
+
+	aliasDomains, err := r.AliasDomains()
+	if err != nil {
+		return err
+	}
+	for _, aliasDomain := range aliasDomains {
+		if aliasDomain.Target() == domainName {
+			return ErrDomainIsAliasDomainTarget
+		}
+	}
+
+	domainDirPath := filepath.Join(r.DirMailDataPath, domainName)
+	domainBackupDirPath := filepath.Join(r.DirMailDataPath, "."+domainName+".deleted."+time.Now().Format("20060102150405"))
+
+	if err := os.Rename(domainDirPath, domainBackupDirPath); err != nil {
+		return err
+	}
+
+	return nil
 }

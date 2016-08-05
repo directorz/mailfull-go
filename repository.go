@@ -18,8 +18,11 @@ var (
 
 // Errors for the operation of the Repository.
 var (
-	ErrDomainNotExist = errors.New("Domain: not exist")
-	ErrUserNotExist   = errors.New("User: not exist")
+	ErrDomainNotExist            = errors.New("Domain: not exist")
+	ErrDomainAlreadyExist        = errors.New("Domain: already exist")
+	ErrDomainIsAliasDomainTarget = errors.New("Domain: is set as alias")
+	ErrAliasDomainAlreadyExist   = errors.New("AliasDomain: already exist")
+	ErrUserNotExist              = errors.New("User: not exist")
 
 	ErrInvalidFormatUsersPassword = errors.New("User: password file invalid format")
 	ErrInvalidFormatAliasDomain   = errors.New("AliasDomain: file invalid format")
