@@ -25,17 +25,27 @@ func (p UserSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 
 // NewUser creates a new User instance.
 func NewUser(name, hashedPassword string, forwards []string) (*User, error) {
-	if !validUserName(name) {
-		return nil, ErrInvalidUserName
+	u := &User{}
+
+	if err := u.setName(name); err != nil {
+		return nil, err
 	}
 
-	u := &User{
-		name:           name,
-		hashedPassword: hashedPassword,
-		forwards:       forwards,
-	}
+	u.SetHashedPassword(hashedPassword)
+	u.SetForwards(forwards)
 
 	return u, nil
+}
+
+// setName sets the name.
+func (u *User) setName(name string) error {
+	if !validUserName(name) {
+		return ErrInvalidUserName
+	}
+
+	u.name = name
+
+	return nil
 }
 
 // Name returns name.
@@ -43,9 +53,19 @@ func (u *User) Name() string {
 	return u.name
 }
 
+// SetHashedPassword sets the hashed password.
+func (u *User) SetHashedPassword(hashedPassword string) {
+	u.hashedPassword = hashedPassword
+}
+
 // HashedPassword returns hashedPassword.
 func (u *User) HashedPassword() string {
 	return u.hashedPassword
+}
+
+// SetForwards sets forwards.
+func (u *User) SetForwards(forwards []string) {
+	u.forwards = forwards
 }
 
 // Forwards returns forwards.

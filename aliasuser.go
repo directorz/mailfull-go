@@ -28,31 +28,50 @@ func (p AliasUserSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 
 // NewAliasUser creates a new AliasUser instance.
 func NewAliasUser(name string, targets []string) (*AliasUser, error) {
-	if !validAliasUserName(name) {
-		return nil, ErrInvalidAliasUserName
+	au := &AliasUser{}
+
+	if err := au.setName(name); err != nil {
+		return nil, err
 	}
 
-	if len(targets) < 1 {
-		return nil, ErrNotEnoughAliasUserTargets
-	}
-
-	for _, target := range targets {
-		if !validAliasUserTarget(target) {
-			return nil, ErrInvalidAliasUserTarget
-		}
-	}
-
-	au := &AliasUser{
-		name:    name,
-		targets: targets,
+	if err := au.SetTargets(targets); err != nil {
+		return nil, err
 	}
 
 	return au, nil
 }
 
+// setName sets the name.
+func (au *AliasUser) setName(name string) error {
+	if !validAliasUserName(name) {
+		return ErrInvalidAliasUserName
+	}
+
+	au.name = name
+
+	return nil
+}
+
 // Name returns name.
 func (au *AliasUser) Name() string {
 	return au.name
+}
+
+// SetTargets sets targets.
+func (au *AliasUser) SetTargets(targets []string) error {
+	if len(targets) < 1 {
+		return ErrNotEnoughAliasUserTargets
+	}
+
+	for _, target := range targets {
+		if !validAliasUserTarget(target) {
+			return ErrInvalidAliasUserTarget
+		}
+	}
+
+	au.targets = targets
+
+	return nil
 }
 
 // Targets returns targets.

@@ -22,24 +22,44 @@ func (p AliasDomainSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 
 // NewAliasDomain creates a new AliasDomain instance.
 func NewAliasDomain(name, target string) (*AliasDomain, error) {
-	if !validAliasDomainName(name) {
-		return nil, ErrInvalidAliasDomainName
-	}
-	if !validAliasDomainTarget(target) {
-		return nil, ErrInvalidAliasDomainTarget
+	ad := &AliasDomain{}
+
+	if err := ad.setName(name); err != nil {
+		return nil, err
 	}
 
-	ad := &AliasDomain{
-		name:   name,
-		target: target,
+	if err := ad.SetTarget(target); err != nil {
+		return nil, err
 	}
 
 	return ad, nil
 }
 
+// setName sets the name.
+func (ad *AliasDomain) setName(name string) error {
+	if !validAliasDomainName(name) {
+		return ErrInvalidAliasDomainName
+	}
+
+	ad.name = name
+
+	return nil
+}
+
 // Name returns name.
 func (ad *AliasDomain) Name() string {
 	return ad.name
+}
+
+// SetTarget sets the target.
+func (ad *AliasDomain) SetTarget(target string) error {
+	if !validAliasDomainTarget(target) {
+		return ErrInvalidAliasDomainTarget
+	}
+
+	ad.target = target
+
+	return nil
 }
 
 // Target returns target.
