@@ -2,8 +2,10 @@ package mailfull
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -116,4 +118,85 @@ func (r *Repository) AliasDomain(aliasDomainName string) (*AliasDomain, error) {
 	}
 
 	return nil, nil
+}
+
+// AliasDomainCreate creates the input AliasDomain.
+func (r *Repository) AliasDomainCreate(aliasDomain *AliasDomain) error {
+	aliasDomains, err := r.AliasDomains()
+	if err != nil {
+		return err
+	}
+
+	for _, ad := range aliasDomains {
+		if ad.Name() == aliasDomain.Name() {
+			return ErrAliasDomainAlreadyExist
+		}
+	}
+	existDomain, err := r.Domain(aliasDomain.Name())
+	if err != nil {
+		return err
+	}
+	if existDomain != nil {
+		return ErrDomainAlreadyExist
+	}
+	existDomain, err = r.Domain(aliasDomain.Target())
+	if err != nil {
+		return err
+	}
+	if existDomain == nil {
+		return ErrDomainNotExist
+	}
+
+	aliasDomains = append(aliasDomains, aliasDomain)
+
+	if err := r.writeAliasDomainsFile(aliasDomains); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// AliasDomainRemove removes a AliasDomain of the input name.
+func (r *Repository) AliasDomainRemove(aliasDomainName string) error {
+	aliasDomains, err := r.AliasDomains()
+	if err != nil {
+		return err
+	}
+
+	idx := -1
+	for i, aliasDomain := range aliasDomains {
+		if aliasDomain.Name() == aliasDomainName {
+			idx = i
+		}
+	}
+	if idx < 0 {
+		return ErrAliasDomainNotExist
+	}
+
+	aliasDomains = append(aliasDomains[:idx], aliasDomains[idx+1:]...)
+
+	if err := r.writeAliasDomainsFile(aliasDomains); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// writeAliasDomainsFile writes a AliasDomain slice to the file.
+func (r *Repository) writeAliasDomainsFile(aliasDomains []*AliasDomain) error {
+	file, err := os.OpenFile(filepath.Join(r.DirMailDataPath, FileNameAliasDomains), os.O_RDWR|os.O_TRUNC, 0666)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	sort.Sort(AliasDomainSlice(aliasDomains))
+
+	for _, aliasDomain := range aliasDomains {
+		if _, err := fmt.Fprintf(file, "%s:%s\n", aliasDomain.Name(), aliasDomain.Target()); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
