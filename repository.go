@@ -234,9 +234,9 @@ func InitRepository(rootPath string) error {
 		}
 	}
 
-	aliasDomainFileName := filepath.Join(c.DirMailDataPath, FileNameAliasDomains)
+	aliasDomainsFileName := filepath.Join(c.DirMailDataPath, FileNameAliasDomains)
 
-	fi, err = os.Stat(aliasDomainFileName)
+	fi, err = os.Stat(aliasDomainsFileName)
 	if err != nil {
 		if err.(*os.PathError).Err != syscall.ENOENT {
 			return err
@@ -247,11 +247,11 @@ func InitRepository(rootPath string) error {
 		}
 	}
 
-	aliasDomainFile, err := os.Create(aliasDomainFileName)
+	aliasDomainsFile, err := os.Create(aliasDomainsFileName)
 	if err != nil {
 		return nil
 	}
-	defer aliasDomainFile.Close()
+	defer aliasDomainsFile.Close()
 
 	return nil
 }
