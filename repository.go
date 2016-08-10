@@ -25,7 +25,11 @@ var (
 	ErrAliasDomainNotExist     = errors.New("AliasDomain: not exist")
 	ErrAliasDomainAlreadyExist = errors.New("AliasDomain: already exist")
 
-	ErrUserNotExist = errors.New("User: not exist")
+	ErrUserNotExist       = errors.New("User: not exist")
+	ErrUserAlreadyExist   = errors.New("User: already exist")
+	ErrUserIsCatchAllUser = errors.New("User: is set as catchall")
+
+	ErrAliasUserAlreadyExist = errors.New("AliasUser: already exist")
 
 	ErrInvalidFormatUsersPassword = errors.New("User: password file invalid format")
 	ErrInvalidFormatAliasDomain   = errors.New("AliasDomain: file invalid format")

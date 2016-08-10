@@ -2,11 +2,14 @@ package mailfull
 
 import (
 	"bufio"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"syscall"
+	"time"
 )
 
 // User represents a User.
@@ -177,12 +180,8 @@ func (r *Repository) User(domainName, userName string) (*User, error) {
 
 // usersHashedPassword returns a string map of usernames to the hashed password.
 func (r *Repository) usersHashedPassword(domainName string) (map[string]string, error) {
-	domain, err := r.Domain(domainName)
-	if err != nil {
-		return nil, err
-	}
-	if domain == nil {
-		return nil, ErrDomainNotExist
+	if !validDomainName(domainName) {
+		return nil, ErrInvalidDomainName
 	}
 
 	file, err := os.Open(filepath.Join(r.DirMailDataPath, domainName, FileNameUsersPassword))
@@ -215,14 +214,9 @@ func (r *Repository) usersHashedPassword(domainName string) (map[string]string, 
 
 // userForwards returns a string slice of forwards that the input name has.
 func (r *Repository) userForwards(domainName, userName string) ([]string, error) {
-	domain, err := r.Domain(domainName)
-	if err != nil {
-		return nil, err
+	if !validDomainName(domainName) {
+		return nil, ErrInvalidDomainName
 	}
-	if domain == nil {
-		return nil, ErrDomainNotExist
-	}
-
 	if !validUserName(userName) {
 		return nil, ErrInvalidUserName
 	}
@@ -249,4 +243,157 @@ func (r *Repository) userForwards(domainName, userName string) ([]string, error)
 	}
 
 	return forwards, nil
+}
+
+// UserCreate creates the input User.
+func (r *Repository) UserCreate(domainName string, user *User) error {
+	existUser, err := r.User(domainName, user.Name())
+	if err != nil {
+		return err
+	}
+	if existUser != nil {
+		return ErrUserAlreadyExist
+	}
+	existAliasUser, err := r.AliasUser(domainName, user.Name())
+	if err != nil {
+		return err
+	}
+	if existAliasUser != nil {
+		return ErrAliasUserAlreadyExist
+	}
+
+	userDirPath := filepath.Join(r.DirMailDataPath, domainName, user.Name())
+
+	dirNames := []string{
+		userDirPath,
+		filepath.Join(userDirPath, "Maildir"),
+		filepath.Join(userDirPath, "Maildir/cur"),
+		filepath.Join(userDirPath, "Maildir/new"),
+		filepath.Join(userDirPath, "Maildir/tmp"),
+	}
+	for _, dirName := range dirNames {
+		if err := os.Mkdir(dirName, 0777); err != nil {
+			return err
+		}
+	}
+
+	if err := r.UserUpdate(domainName, user); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// UserUpdate updates the input User.
+func (r *Repository) UserUpdate(domainName string, user *User) error {
+	existUser, err := r.User(domainName, user.Name())
+	if err != nil {
+		return err
+	}
+	if existUser == nil {
+		return ErrUserNotExist
+	}
+
+	hashedPasswords, err := r.usersHashedPassword(domainName)
+	if err != nil {
+		return err
+	}
+	hashedPasswords[user.Name()] = user.HashedPassword()
+	if err := r.writeUsersPasswordFile(domainName, hashedPasswords); err != nil {
+		return err
+	}
+
+	if err := r.writeUserForwardsFile(domainName, user.Name(), user.Forwards()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// UserRemove removes a User of the input name.
+func (r *Repository) UserRemove(domainName, userName string) error {
+	existUser, err := r.User(domainName, userName)
+	if err != nil {
+		return err
+	}
+	if existUser == nil {
+		return ErrUserNotExist
+	}
+
+	catchAllUser, err := r.CatchAllUser(domainName)
+	if err != nil {
+		return err
+	}
+	if catchAllUser != nil && catchAllUser.Name() == userName {
+		return ErrUserIsCatchAllUser
+	}
+
+	hashedPasswords, err := r.usersHashedPassword(domainName)
+	if err != nil {
+		return err
+	}
+	delete(hashedPasswords, userName)
+	if err := r.writeUsersPasswordFile(domainName, hashedPasswords); err != nil {
+		return err
+	}
+
+	userDirPath := filepath.Join(r.DirMailDataPath, domainName, userName)
+	userBackupDirPath := filepath.Join(r.DirMailDataPath, domainName, "."+userName+".deleted."+time.Now().Format("20060102150405"))
+
+	if err := os.Rename(userDirPath, userBackupDirPath); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// writeUsersPasswordFile writes passwords of each users to the file.
+func (r *Repository) writeUsersPasswordFile(domainName string, hashedPasswords map[string]string) error {
+	if !validDomainName(domainName) {
+		return ErrInvalidDomainName
+	}
+
+	keys := make([]string, 0, len(hashedPasswords))
+	for key := range hashedPasswords {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	file, err := os.OpenFile(filepath.Join(r.DirMailDataPath, domainName, FileNameUsersPassword), os.O_RDWR|os.O_TRUNC, 0666)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	for _, key := range keys {
+		if _, err := fmt.Fprintf(file, "%s:%s\n", key, hashedPasswords[key]); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// writeUserForwardsFile writes forwards to user's forward file.
+func (r *Repository) writeUserForwardsFile(domainName, userName string, forwards []string) error {
+	if !validDomainName(domainName) {
+		return ErrInvalidDomainName
+	}
+	if !validUserName(userName) {
+		return ErrInvalidUserName
+	}
+
+	file, err := os.Create(filepath.Join(r.DirMailDataPath, domainName, userName, FileNameUserForwards))
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	for _, forward := range forwards {
+		if _, err := fmt.Fprintf(file, "%s\n", forward); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
