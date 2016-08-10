@@ -2,6 +2,7 @@ package mailfull
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -64,4 +65,46 @@ func (r *Repository) CatchAllUser(domainName string) (*CatchAllUser, error) {
 	}
 
 	return catchAllUser, nil
+}
+
+// CatchAllUserSet sets a CatchAllUser to the input Domain.
+func (r *Repository) CatchAllUserSet(domainName string, catchAllUser *CatchAllUser) error {
+	existUser, err := r.User(domainName, catchAllUser.Name())
+	if err != nil {
+		return err
+	}
+	if existUser == nil {
+		return ErrUserNotExist
+	}
+
+	file, err := os.OpenFile(filepath.Join(r.DirMailDataPath, domainName, FileNameCatchAllUser), os.O_RDWR|os.O_TRUNC, 0666)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	if _, err := fmt.Fprintf(file, "%s\n", catchAllUser.Name()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CatchAllUserUnset removes a CatchAllUser from the input Domain.
+func (r *Repository) CatchAllUserUnset(domainName string) error {
+	existDomain, err := r.Domain(domainName)
+	if err != nil {
+		return err
+	}
+	if existDomain == nil {
+		return ErrDomainNotExist
+	}
+
+	file, err := os.OpenFile(filepath.Join(r.DirMailDataPath, domainName, FileNameCatchAllUser), os.O_RDWR|os.O_TRUNC, 0666)
+	if err != nil {
+		return err
+	}
+	file.Close()
+
+	return nil
 }
