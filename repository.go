@@ -29,6 +29,7 @@ var (
 	ErrUserAlreadyExist   = errors.New("User: already exist")
 	ErrUserIsCatchAllUser = errors.New("User: is set as catchall")
 
+	ErrAliasUserNotExist     = errors.New("AliasUser: not exist")
 	ErrAliasUserAlreadyExist = errors.New("AliasUser: already exist")
 
 	ErrInvalidFormatUsersPassword = errors.New("User: password file invalid format")

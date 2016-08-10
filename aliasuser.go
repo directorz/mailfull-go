@@ -3,8 +3,10 @@ package mailfull
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -136,4 +138,108 @@ func (r *Repository) AliasUser(domainName, aliasUserName string) (*AliasUser, er
 	}
 
 	return nil, nil
+}
+
+// AliasUserCreate creates the input AliasUser.
+func (r *Repository) AliasUserCreate(domainName string, aliasUser *AliasUser) error {
+	aliasUsers, err := r.AliasUsers(domainName)
+	if err != nil {
+		return err
+	}
+
+	for _, au := range aliasUsers {
+		if au.Name() == aliasUser.Name() {
+			return ErrAliasUserAlreadyExist
+		}
+	}
+	existUser, err := r.User(domainName, aliasUser.Name())
+	if err != nil {
+		return err
+	}
+	if existUser != nil {
+		return ErrUserAlreadyExist
+	}
+
+	aliasUsers = append(aliasUsers, aliasUser)
+
+	if err := r.writeAliasUsersFile(domainName, aliasUsers); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// AliasUserUpdate updates the input AliasUser.
+func (r *Repository) AliasUserUpdate(domainName string, aliasUser *AliasUser) error {
+	aliasUsers, err := r.AliasUsers(domainName)
+	if err != nil {
+		return err
+	}
+
+	idx := -1
+	for i, au := range aliasUsers {
+		if au.Name() == aliasUser.Name() {
+			idx = i
+		}
+	}
+	if idx < 0 {
+		return ErrAliasUserNotExist
+	}
+
+	aliasUsers[idx] = aliasUser
+
+	if err := r.writeAliasUsersFile(domainName, aliasUsers); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// AliasUserRemove removes a AliasUser of the input name.
+func (r *Repository) AliasUserRemove(domainName string, aliasUserName string) error {
+	aliasUsers, err := r.AliasUsers(domainName)
+	if err != nil {
+		return err
+	}
+
+	idx := -1
+	for i, aliasUser := range aliasUsers {
+		if aliasUser.Name() == aliasUserName {
+			idx = i
+		}
+	}
+	if idx < 0 {
+		return ErrAliasUserNotExist
+	}
+
+	aliasUsers = append(aliasUsers[:idx], aliasUsers[idx+1:]...)
+
+	if err := r.writeAliasUsersFile(domainName, aliasUsers); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// writeAliasUsersFile writes a AliasUser slice to the file.
+func (r *Repository) writeAliasUsersFile(domainName string, aliasUsers []*AliasUser) error {
+	if !validDomainName(domainName) {
+		return ErrInvalidDomainName
+	}
+
+	file, err := os.OpenFile(filepath.Join(r.DirMailDataPath, domainName, FileNameAliasUsers), os.O_RDWR|os.O_TRUNC, 0666)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	sort.Sort(AliasUserSlice(aliasUsers))
+
+	for _, aliasUser := range aliasUsers {
+		if _, err := fmt.Fprintf(file, "%s:%s\n", aliasUser.Name(), strings.Join(aliasUser.Targets(), ",")); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
