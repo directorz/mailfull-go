@@ -43,9 +43,9 @@ func main() {
 			meta.SubCmdName = c.Subcommand()
 			return &command.InitCommand{Meta: meta}, nil
 		},
-		"domainlist": func() (cli.Command, error) {
+		"domains": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.DomainListCommand{Meta: meta}, nil
+			return &command.DomainsCommand{Meta: meta}, nil
 		},
 		"commit": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()

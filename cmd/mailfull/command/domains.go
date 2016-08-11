@@ -7,18 +7,18 @@ import (
 	"github.com/directorz/mailfull-go"
 )
 
-// DomainListCommand represents a DomainListCommand.
-type DomainListCommand struct {
+// DomainsCommand represents a DomainsCommand.
+type DomainsCommand struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *DomainListCommand) Synopsis() string {
+func (c *DomainsCommand) Synopsis() string {
 	return "Show domains."
 }
 
 // Help returns long-form help text.
-func (c *DomainListCommand) Help() string {
+func (c *DomainsCommand) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s
@@ -33,7 +33,7 @@ Description:
 }
 
 // Run runs the command and returns the exit status.
-func (c *DomainListCommand) Run(args []string) int {
+func (c *DomainsCommand) Run(args []string) int {
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
