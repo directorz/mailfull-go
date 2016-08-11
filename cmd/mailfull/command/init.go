@@ -23,9 +23,10 @@ Usage:
     %s %s
 
 Description:
-    Initializes current directory as a Mailfull repository.
+    %s
 `,
-		c.CmdName, c.SubCmdName)
+		c.CmdName, c.SubCmdName,
+		c.Synopsis())
 
 	return txt[1:]
 }

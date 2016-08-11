@@ -13,7 +13,7 @@ type CommitCommand struct {
 
 // Synopsis returns a one-line synopsis.
 func (c *CommitCommand) Synopsis() string {
-	return "Create a database from the structure of the MailData directory."
+	return "Create databases from the structure of the MailData directory."
 }
 
 // Help returns long-form help text.
@@ -23,9 +23,10 @@ Usage:
     %s %s
 
 Description:
-    Create a database from the structure of the MailData directory.
+    %s
 `,
-		c.CmdName, c.SubCmdName)
+		c.CmdName, c.SubCmdName,
+		c.Synopsis())
 
 	return txt[1:]
 }

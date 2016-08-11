@@ -14,7 +14,7 @@ type DomainListCommand struct {
 
 // Synopsis returns a one-line synopsis.
 func (c *DomainListCommand) Synopsis() string {
-	return "Show all domains."
+	return "Show domains."
 }
 
 // Help returns long-form help text.
@@ -24,9 +24,10 @@ Usage:
     %s %s
 
 Description:
-    Show all domains.
+    %s
 `,
-		c.CmdName, c.SubCmdName)
+		c.CmdName, c.SubCmdName,
+		c.Synopsis())
 
 	return txt[1:]
 }
@@ -44,7 +45,6 @@ func (c *DomainListCommand) Run(args []string) int {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
 	}
-
 	sort.Sort(mailfull.DomainSlice(domains))
 
 	for _, domain := range domains {
