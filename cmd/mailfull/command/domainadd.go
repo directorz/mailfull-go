@@ -61,7 +61,7 @@ func (c *DomainAddCommand) Run(args []string) int {
 		return 1
 	}
 
-	user, err := mailfull.NewUser("postmaster", "", nil)
+	user, err := mailfull.NewUser("postmaster", mailfull.NeverMatchHashedPassword, nil)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1

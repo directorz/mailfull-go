@@ -18,3 +18,6 @@ const (
 	FileNameDbForwards     = "forwards"
 	FileNameDbPasswords    = "vpasswd"
 )
+
+// NeverMatchHashedPassword is hash string that is never match with any password.
+const NeverMatchHashedPassword = "{SSHA}!!"
