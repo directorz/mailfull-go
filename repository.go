@@ -42,7 +42,6 @@ type RepositoryConfig struct {
 	DirDatabasePath string `toml:"dir_database"`
 	DirMailDataPath string `toml:"dir_maildata"`
 	Username        string `toml:"username"`
-	Groupname       string `toml:"groupname"`
 	CmdPostalias    string `toml:"postalias"`
 	CmdPostmap      string `toml:"postmap"`
 }
@@ -75,7 +74,6 @@ func DefaultRepositoryConfig() *RepositoryConfig {
 		DirDatabasePath: "./etc",
 		DirMailDataPath: "./domains",
 		Username:        "mailfull",
-		Groupname:       "mailfull",
 		CmdPostalias:    "postalias",
 		CmdPostmap:      "postmap",
 	}
