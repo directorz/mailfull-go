@@ -3,7 +3,9 @@ package mailfull
 import (
 	"errors"
 	"os"
+	"os/user"
 	"path/filepath"
+	"strconv"
 	"syscall"
 
 	"github.com/BurntSushi/toml"
@@ -73,7 +75,7 @@ func DefaultRepositoryConfig() *RepositoryConfig {
 	c := &RepositoryConfig{
 		DirDatabasePath: "./etc",
 		DirMailDataPath: "./domains",
-		Username:        "mailfull",
+		Username:        "",
 		CmdPostalias:    "postalias",
 		CmdPostmap:      "postmap",
 	}
@@ -84,12 +86,31 @@ func DefaultRepositoryConfig() *RepositoryConfig {
 // Repository represents a Repository.
 type Repository struct {
 	*RepositoryConfig
+
+	uid int
+	gid int
 }
 
 // NewRepository creates a new Repository instance.
 func NewRepository(c *RepositoryConfig) (*Repository, error) {
+	u, err := user.Lookup(c.Username)
+	if err != nil {
+		return nil, err
+	}
+	uid, err := strconv.Atoi(u.Uid)
+	if err != nil {
+		return nil, err
+	}
+	gid, err := strconv.Atoi(u.Gid)
+	if err != nil {
+		return nil, err
+	}
+
 	r := &Repository{
 		RepositoryConfig: c,
+
+		uid: uid,
+		gid: gid,
 	}
 
 	return r, nil
@@ -201,7 +222,13 @@ func InitRepository(rootPath string) error {
 	}
 	defer configFile.Close()
 
+	u, err := user.Current()
+	if err != nil {
+		return nil
+	}
+
 	c := DefaultRepositoryConfig()
+	c.Username = u.Username
 
 	enc := toml.NewEncoder(configFile)
 	if err := enc.Encode(c); err != nil {
