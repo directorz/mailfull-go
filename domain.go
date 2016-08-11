@@ -116,24 +116,36 @@ func (r *Repository) DomainCreate(domain *Domain) error {
 
 	domainDirPath := filepath.Join(r.DirMailDataPath, domain.Name())
 
-	if err := os.Mkdir(domainDirPath, 0777); err != nil {
+	if err := os.Mkdir(domainDirPath, 0700); err != nil {
+		return err
+	}
+	if err := os.Chown(domainDirPath, r.uid, r.gid); err != nil {
 		return err
 	}
 
-	usersPasswordFile, err := os.Create(filepath.Join(domainDirPath, FileNameUsersPassword))
+	usersPasswordFile, err := os.OpenFile(filepath.Join(domainDirPath, FileNameUsersPassword), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
+		return err
+	}
+	if err := usersPasswordFile.Chown(r.uid, r.gid); err != nil {
 		return err
 	}
 	usersPasswordFile.Close()
 
-	aliasUsersFile, err := os.Create(filepath.Join(domainDirPath, FileNameAliasUsers))
+	aliasUsersFile, err := os.OpenFile(filepath.Join(domainDirPath, FileNameAliasUsers), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
+		return err
+	}
+	if err := aliasUsersFile.Chown(r.uid, r.gid); err != nil {
 		return err
 	}
 	aliasUsersFile.Close()
 
-	catchAllUserFile, err := os.Create(filepath.Join(domainDirPath, FileNameCatchAllUser))
+	catchAllUserFile, err := os.OpenFile(filepath.Join(domainDirPath, FileNameCatchAllUser), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
+		return err
+	}
+	if err := catchAllUserFile.Chown(r.uid, r.gid); err != nil {
 		return err
 	}
 	catchAllUserFile.Close()

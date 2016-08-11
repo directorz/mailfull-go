@@ -77,7 +77,7 @@ func (r *Repository) CatchAllUserSet(domainName string, catchAllUser *CatchAllUs
 		return ErrUserNotExist
 	}
 
-	file, err := os.OpenFile(filepath.Join(r.DirMailDataPath, domainName, FileNameCatchAllUser), os.O_RDWR|os.O_TRUNC, 0666)
+	file, err := os.OpenFile(filepath.Join(r.DirMailDataPath, domainName, FileNameCatchAllUser), os.O_RDWR|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func (r *Repository) CatchAllUserUnset(domainName string) error {
 		return ErrDomainNotExist
 	}
 
-	file, err := os.OpenFile(filepath.Join(r.DirMailDataPath, domainName, FileNameCatchAllUser), os.O_RDWR|os.O_TRUNC, 0666)
+	file, err := os.OpenFile(filepath.Join(r.DirMailDataPath, domainName, FileNameCatchAllUser), os.O_RDWR|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}

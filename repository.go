@@ -255,7 +255,7 @@ func InitRepository(rootPath string) error {
 	fi, err = os.Stat(c.DirMailDataPath)
 	if err != nil {
 		if err.(*os.PathError).Err == syscall.ENOENT {
-			if err = os.Mkdir(c.DirMailDataPath, 0777); err != nil {
+			if err = os.Mkdir(c.DirMailDataPath, 0700); err != nil {
 				return err
 			}
 		} else {
@@ -280,7 +280,7 @@ func InitRepository(rootPath string) error {
 		}
 	}
 
-	aliasDomainsFile, err := os.Create(aliasDomainsFileName)
+	aliasDomainsFile, err := os.OpenFile(aliasDomainsFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return nil
 	}

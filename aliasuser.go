@@ -227,7 +227,7 @@ func (r *Repository) writeAliasUsersFile(domainName string, aliasUsers []*AliasU
 		return ErrInvalidDomainName
 	}
 
-	file, err := os.OpenFile(filepath.Join(r.DirMailDataPath, domainName, FileNameAliasUsers), os.O_RDWR|os.O_TRUNC, 0666)
+	file, err := os.OpenFile(filepath.Join(r.DirMailDataPath, domainName, FileNameAliasUsers), os.O_RDWR|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}

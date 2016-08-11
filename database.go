@@ -64,6 +64,9 @@ func (r *Repository) generateDbDomains(md *MailData) error {
 	if err != nil {
 		return err
 	}
+	if err := dbDomains.Chown(r.uid, r.gid); err != nil {
+		return err
+	}
 	defer dbDomains.Close()
 
 	for _, domain := range md.Domains {
@@ -84,6 +87,9 @@ func (r *Repository) generateDbDomains(md *MailData) error {
 func (r *Repository) generateDbDestinations(md *MailData) error {
 	dbDestinations, err := os.Create(filepath.Join(r.DirDatabasePath, FileNameDbDestinations))
 	if err != nil {
+		return err
+	}
+	if err := dbDestinations.Chown(r.uid, r.gid); err != nil {
 		return err
 	}
 	defer dbDestinations.Close()
@@ -141,6 +147,9 @@ func (r *Repository) generateDbMaildirs(md *MailData) error {
 	if err != nil {
 		return err
 	}
+	if err := dbMaildirs.Chown(r.uid, r.gid); err != nil {
+		return err
+	}
 	defer dbMaildirs.Close()
 
 	for _, domain := range md.Domains {
@@ -157,6 +166,9 @@ func (r *Repository) generateDbMaildirs(md *MailData) error {
 func (r *Repository) generateDbLocaltable(md *MailData) error {
 	dbLocaltable, err := os.Create(filepath.Join(r.DirDatabasePath, FileNameDbLocaltable))
 	if err != nil {
+		return err
+	}
+	if err := dbLocaltable.Chown(r.uid, r.gid); err != nil {
 		return err
 	}
 	defer dbLocaltable.Close()
@@ -178,6 +190,9 @@ func (r *Repository) generateDbLocaltable(md *MailData) error {
 func (r *Repository) generateDbForwards(md *MailData) error {
 	dbForwards, err := os.Create(filepath.Join(r.DirDatabasePath, FileNameDbForwards))
 	if err != nil {
+		return err
+	}
+	if err := dbForwards.Chown(r.uid, r.gid); err != nil {
 		return err
 	}
 	defer dbForwards.Close()
@@ -211,6 +226,9 @@ func (r *Repository) generateDbForwards(md *MailData) error {
 func (r *Repository) generateDbPasswords(md *MailData) error {
 	dbPasswords, err := os.Create(filepath.Join(r.DirDatabasePath, FileNameDbPasswords))
 	if err != nil {
+		return err
+	}
+	if err := dbPasswords.Chown(r.uid, r.gid); err != nil {
 		return err
 	}
 	defer dbPasswords.Close()

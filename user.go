@@ -272,7 +272,10 @@ func (r *Repository) UserCreate(domainName string, user *User) error {
 		filepath.Join(userDirPath, "Maildir/tmp"),
 	}
 	for _, dirName := range dirNames {
-		if err := os.Mkdir(dirName, 0777); err != nil {
+		if err := os.Mkdir(dirName, 0700); err != nil {
+			return err
+		}
+		if err := os.Chown(dirName, r.uid, r.gid); err != nil {
 			return err
 		}
 	}
@@ -359,7 +362,7 @@ func (r *Repository) writeUsersPasswordFile(domainName string, hashedPasswords m
 	}
 	sort.Strings(keys)
 
-	file, err := os.OpenFile(filepath.Join(r.DirMailDataPath, domainName, FileNameUsersPassword), os.O_RDWR|os.O_TRUNC, 0666)
+	file, err := os.OpenFile(filepath.Join(r.DirMailDataPath, domainName, FileNameUsersPassword), os.O_RDWR|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
@@ -383,8 +386,11 @@ func (r *Repository) writeUserForwardsFile(domainName, userName string, forwards
 		return ErrInvalidUserName
 	}
 
-	file, err := os.Create(filepath.Join(r.DirMailDataPath, domainName, userName, FileNameUserForwards))
+	file, err := os.OpenFile(filepath.Join(r.DirMailDataPath, domainName, userName, FileNameUserForwards), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
+		return err
+	}
+	if err := file.Chown(r.uid, r.gid); err != nil {
 		return err
 	}
 	defer file.Close()
