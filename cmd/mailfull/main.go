@@ -67,6 +67,18 @@ func main() {
 			meta.SubCmdName = c.Subcommand()
 			return &command.AliasDomainDelCommand{Meta: meta}, nil
 		},
+		"users": func() (cli.Command, error) {
+			meta.SubCmdName = c.Subcommand()
+			return &command.UsersCommand{Meta: meta}, nil
+		},
+		"useradd": func() (cli.Command, error) {
+			meta.SubCmdName = c.Subcommand()
+			return &command.UserAddCommand{Meta: meta}, nil
+		},
+		"userdel": func() (cli.Command, error) {
+			meta.SubCmdName = c.Subcommand()
+			return &command.UserDelCommand{Meta: meta}, nil
+		},
 		"commit": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
 			return &command.CommitCommand{Meta: meta}, nil
