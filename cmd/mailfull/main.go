@@ -79,6 +79,14 @@ func main() {
 			meta.SubCmdName = c.Subcommand()
 			return &command.UserDelCommand{Meta: meta}, nil
 		},
+		"userpasswd": func() (cli.Command, error) {
+			meta.SubCmdName = c.Subcommand()
+			return &command.UserPasswdCommand{Meta: meta}, nil
+		},
+		"usercheckpw": func() (cli.Command, error) {
+			meta.SubCmdName = c.Subcommand()
+			return &command.UserCheckPwCommand{Meta: meta}, nil
+		},
 		"commit": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
 			return &command.CommitCommand{Meta: meta}, nil
