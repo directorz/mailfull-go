@@ -1,3 +1,6 @@
+/*
+Command mailfull is a CLI application using the mailfull package.
+*/
 package main
 
 import (
