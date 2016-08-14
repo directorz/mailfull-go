@@ -43,6 +43,10 @@ func main() {
 			meta.SubCmdName = c.Subcommand()
 			return &command.InitCommand{Meta: meta}, nil
 		},
+		"genconfig": func() (cli.Command, error) {
+			meta.SubCmdName = c.Subcommand()
+			return &command.GenConfigCommand{Meta: meta}, nil
+		},
 		"domains": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
 			return &command.DomainsCommand{Meta: meta}, nil
