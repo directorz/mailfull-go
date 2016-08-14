@@ -87,6 +87,22 @@ func main() {
 			meta.SubCmdName = c.Subcommand()
 			return &command.UserCheckPwCommand{Meta: meta}, nil
 		},
+		"aliasusers": func() (cli.Command, error) {
+			meta.SubCmdName = c.Subcommand()
+			return &command.AliasUsersCommand{Meta: meta}, nil
+		},
+		"aliasuseradd": func() (cli.Command, error) {
+			meta.SubCmdName = c.Subcommand()
+			return &command.AliasUserAddCommand{Meta: meta}, nil
+		},
+		"aliasusermod": func() (cli.Command, error) {
+			meta.SubCmdName = c.Subcommand()
+			return &command.AliasUserModCommand{Meta: meta}, nil
+		},
+		"aliasuserdel": func() (cli.Command, error) {
+			meta.SubCmdName = c.Subcommand()
+			return &command.AliasUserDelCommand{Meta: meta}, nil
+		},
 		"catchall": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
 			return &command.CatchAllCommand{Meta: meta}, nil
