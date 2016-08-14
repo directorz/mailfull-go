@@ -87,6 +87,18 @@ func main() {
 			meta.SubCmdName = c.Subcommand()
 			return &command.UserCheckPwCommand{Meta: meta}, nil
 		},
+		"catchall": func() (cli.Command, error) {
+			meta.SubCmdName = c.Subcommand()
+			return &command.CatchAllCommand{Meta: meta}, nil
+		},
+		"catchallset": func() (cli.Command, error) {
+			meta.SubCmdName = c.Subcommand()
+			return &command.CatchAllSetCommand{Meta: meta}, nil
+		},
+		"catchallunset": func() (cli.Command, error) {
+			meta.SubCmdName = c.Subcommand()
+			return &command.CatchAllUnsetCommand{Meta: meta}, nil
+		},
 		"commit": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
 			return &command.CommitCommand{Meta: meta}, nil
