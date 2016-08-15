@@ -3,6 +3,8 @@ mailfull-go
 
 A management tool for virtual domain email for Postfix and Dovecot written in Go.
 
+[![GoDoc](https://godoc.org/github.com/directorz/mailfull-go?status.svg)](https://godoc.org/github.com/directorz/mailfull-go)
+
 Features
 --------
 
