@@ -44,8 +44,8 @@ type RepositoryConfig struct {
 	DirDatabasePath string `toml:"dir_database"`
 	DirMailDataPath string `toml:"dir_maildata"`
 	Username        string `toml:"username"`
-	CmdPostalias    string `toml:"postalias"`
-	CmdPostmap      string `toml:"postmap"`
+	CmdPostalias    string `toml:"cmd_postalias"`
+	CmdPostmap      string `toml:"cmd_postmap"`
 }
 
 // Normalize normalizes paramaters of the RepositoryConfig.
