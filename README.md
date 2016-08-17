@@ -66,3 +66,8 @@ Add a new domain and user.
 ```
 
 Enjoy!
+
+More info
+---------
+
+See [documentation](doc/README.md)
