@@ -126,10 +126,10 @@ func OpenRepository(basePath string) (*Repository, error) {
 	for {
 		configDirPath := filepath.Join(rootPath, DirNameConfig)
 
-		fi, errStat := os.Stat(configDirPath)
-		if errStat != nil {
-			if errStat.(*os.PathError).Err != syscall.ENOENT {
-				return nil, errStat
+		fi, err := os.Stat(configDirPath)
+		if err != nil {
+			if err.(*os.PathError).Err != syscall.ENOENT {
+				return nil, err
 			}
 		} else {
 			if fi.IsDir() {
