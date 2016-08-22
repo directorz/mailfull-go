@@ -1,1 +1,6 @@
-/cli/mailfull/mailfull
+/vendor
+/build
+/release
+/github_token
+
+/cmd/mailfull/mailfull
