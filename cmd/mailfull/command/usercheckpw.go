@@ -81,9 +81,9 @@ func (c *UserCheckPwCommand) Run(args []string) int {
 	}
 
 	if len(args) != 2 {
-		input, err1 := c.UI.AskSecret(fmt.Sprintf("Enter password for %s:", address))
-		if err1 != nil {
-			fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err1)
+		input, err := c.UI.AskSecret(fmt.Sprintf("Enter password for %s:", address))
+		if err != nil {
+			fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 			return 1
 		}
 

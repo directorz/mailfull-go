@@ -81,14 +81,14 @@ func (c *UserPasswdCommand) Run(args []string) int {
 	}
 
 	if len(args) != 2 {
-		input1, err1 := c.UI.AskSecret(fmt.Sprintf("Enter new password for %s:", address))
-		if err1 != nil {
-			fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err1)
+		input1, err := c.UI.AskSecret(fmt.Sprintf("Enter new password for %s:", address))
+		if err != nil {
+			fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 			return 1
 		}
-		input2, err2 := c.UI.AskSecret("Retype new password:")
-		if err2 != nil {
-			fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err2)
+		input2, err := c.UI.AskSecret("Retype new password:")
+		if err != nil {
+			fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 			return 1
 		}
 		if input1 != input2 {
@@ -100,9 +100,9 @@ func (c *UserPasswdCommand) Run(args []string) int {
 
 	hashedPassword := mailfull.NeverMatchHashedPassword
 	if rawPassword != "" {
-		str, errHash := ssha.Generate(rawPassword, 4)
-		if errHash != nil {
-			fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", errHash)
+		str, err := ssha.Generate(rawPassword, 4)
+		if err != nil {
+			fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 			return 1
 		}
 		hashedPassword = str

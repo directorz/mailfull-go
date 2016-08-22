@@ -59,6 +59,11 @@ func (c *UserDelCommand) Run(args []string) int {
 		return 1
 	}
 
+	if userName == "postmaster" {
+		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] Cannot delete postmaster.\n")
+		return 1
+	}
+
 	if err := repo.UserRemove(domainName, userName); err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1

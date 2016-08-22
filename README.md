@@ -39,6 +39,7 @@ Initialize a directory as a Mailfull repository.
 ```
 $ mkdir /path/to/repo && cd /path/to/repo
 $ mailfull init
+$ mailfull commit
 ```
 
 Generate configurations for Postfix and Dovecot. (Edit as needed.)
