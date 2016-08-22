@@ -11,6 +11,7 @@ import (
 // Domain represents a Domain.
 type Domain struct {
 	name         string
+	disabled     bool
 	Users        []*User
 	AliasUsers   []*AliasUser
 	CatchAllUser *CatchAllUser
@@ -25,20 +26,39 @@ func (p DomainSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 
 // NewDomain creates a new Domain instance.
 func NewDomain(name string) (*Domain, error) {
-	if !validDomainName(name) {
-		return nil, ErrInvalidDomainName
-	}
+	d := &Domain{}
 
-	d := &Domain{
-		name: name,
+	if err := d.setName(name); err != nil {
+		return nil, err
 	}
 
 	return d, nil
 }
 
+// setName sets the name.
+func (d *Domain) setName(name string) error {
+	if !validDomainName(name) {
+		return ErrInvalidDomainName
+	}
+
+	d.name = name
+
+	return nil
+}
+
 // Name returns name.
 func (d *Domain) Name() string {
 	return d.name
+}
+
+// SetDisabled disables the Domain if the input is true.
+func (d *Domain) SetDisabled(disabled bool) {
+	d.disabled = disabled
+}
+
+// Disabled returns true if the Domain is disabled.
+func (d *Domain) Disabled() bool {
+	return d.disabled
 }
 
 // Domains returns a Domain slice.
