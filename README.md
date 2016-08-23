@@ -16,6 +16,11 @@ Features
 Installation
 ------------
 
+### Binary
+
+You can download archive file from [releases page](https://github.com/directorz/mailfull-go/releases) .  
+Download and unpack the archive file, and put the binary file to somewhere you want.
+
 ### go get
 
 Installed in `$GOPATH/bin`

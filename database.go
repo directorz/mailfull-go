@@ -70,6 +70,10 @@ func (r *Repository) generateDbDomains(md *MailData) error {
 	defer dbDomains.Close()
 
 	for _, domain := range md.Domains {
+		if domain.Disabled() {
+			continue
+		}
+
 		if _, err := fmt.Fprintf(dbDomains, "%s virtual\n", domain.Name()); err != nil {
 			return err
 		}
@@ -95,6 +99,10 @@ func (r *Repository) generateDbDestinations(md *MailData) error {
 	defer dbDestinations.Close()
 
 	for _, domain := range md.Domains {
+		if domain.Disabled() {
+			continue
+		}
+
 		// ho-ge.example.com -> ho_ge.example.com
 		underscoredDomainName := domain.Name()
 		underscoredDomainName = strings.Replace(underscoredDomainName, `-`, `_`, -1)
@@ -153,6 +161,10 @@ func (r *Repository) generateDbMaildirs(md *MailData) error {
 	defer dbMaildirs.Close()
 
 	for _, domain := range md.Domains {
+		if domain.Disabled() {
+			continue
+		}
+
 		for _, user := range domain.Users {
 			if _, err := fmt.Fprintf(dbMaildirs, "%s@%s %s/%s/Maildir/\n", user.Name(), domain.Name(), domain.Name(), user.Name()); err != nil {
 				return err
@@ -174,6 +186,10 @@ func (r *Repository) generateDbLocaltable(md *MailData) error {
 	defer dbLocaltable.Close()
 
 	for _, domain := range md.Domains {
+		if domain.Disabled() {
+			continue
+		}
+
 		// ho-ge.example.com -> ho_ge\.example\.com
 		escapedDomainName := domain.Name()
 		escapedDomainName = strings.Replace(escapedDomainName, `-`, `_`, -1)
@@ -198,6 +214,10 @@ func (r *Repository) generateDbForwards(md *MailData) error {
 	defer dbForwards.Close()
 
 	for _, domain := range md.Domains {
+		if domain.Disabled() {
+			continue
+		}
+
 		// ho-ge.example.com -> ho_ge.example.com
 		underscoredDomainName := domain.Name()
 		underscoredDomainName = strings.Replace(underscoredDomainName, `-`, `_`, -1)
@@ -234,6 +254,10 @@ func (r *Repository) generateDbPasswords(md *MailData) error {
 	defer dbPasswords.Close()
 
 	for _, domain := range md.Domains {
+		if domain.Disabled() {
+			continue
+		}
+
 		for _, user := range domain.Users {
 			if _, err := fmt.Fprintf(dbPasswords, "%s@%s:%s\n", user.Name(), domain.Name(), user.HashedPassword()); err != nil {
 				return err

@@ -25,6 +25,7 @@ Usage:
 
 Description:
     %s
+    Disabled domains are marked "!" the beginning.
 `,
 		c.CmdName, c.SubCmdName,
 		c.Synopsis())
@@ -48,7 +49,12 @@ func (c *DomainsCommand) Run(args []string) int {
 	sort.Sort(mailfull.DomainSlice(domains))
 
 	for _, domain := range domains {
-		fmt.Fprintf(c.UI.Writer, "%s\n", domain.Name())
+		disableStr := ""
+		if domain.Disabled() {
+			disableStr = "!"
+		}
+
+		fmt.Fprintf(c.UI.Writer, "%s%s\n", disableStr, domain.Name())
 	}
 
 	return 0
