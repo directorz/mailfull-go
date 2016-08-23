@@ -82,6 +82,12 @@ func (r *Repository) Domains() ([]*Domain, error) {
 			continue
 		}
 
+		disabled, err := r.domainDisabled(name)
+		if err != nil {
+			return nil, err
+		}
+		domain.SetDisabled(disabled)
+
 		domains = append(domains, domain)
 	}
 
@@ -114,7 +120,36 @@ func (r *Repository) Domain(domainName string) (*Domain, error) {
 		return nil, err
 	}
 
+	disabled, err := r.domainDisabled(name)
+	if err != nil {
+		return nil, err
+	}
+	domain.SetDisabled(disabled)
+
 	return domain, nil
+}
+
+// domainDisabled returns true if the input Domain is disabled.
+func (r *Repository) domainDisabled(domainName string) (bool, error) {
+	if !validDomainName(domainName) {
+		return false, ErrInvalidDomainName
+	}
+
+	fi, err := os.Stat(filepath.Join(r.DirMailDataPath, domainName, FileNameDomainDisable))
+
+	if err != nil {
+		if err.(*os.PathError).Err == syscall.ENOENT {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	if fi.IsDir() {
+		return false, ErrInvalidFormatDomainDisabled
+	}
+
+	return true, nil
 }
 
 // DomainCreate creates the input Domain.
@@ -170,6 +205,29 @@ func (r *Repository) DomainCreate(domain *Domain) error {
 	}
 	catchAllUserFile.Close()
 
+	if domain.Disabled() {
+		if err := r.writeDomainDisabledFile(domain.Name(), domain.Disabled()); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// DomainUpdate updates the input Domain.
+func (r *Repository) DomainUpdate(domain *Domain) error {
+	existDomain, err := r.Domain(domain.Name())
+	if err != nil {
+		return err
+	}
+	if existDomain == nil {
+		return ErrDomainNotExist
+	}
+
+	if err := r.writeDomainDisabledFile(domain.Name(), domain.Disabled()); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -198,6 +256,39 @@ func (r *Repository) DomainRemove(domainName string) error {
 
 	if err := os.Rename(domainDirPath, domainBackupDirPath); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// writeDomainDisabledFile creates/removes the disabled file.
+func (r *Repository) writeDomainDisabledFile(domainName string, disabled bool) error {
+	if !validDomainName(domainName) {
+		return ErrInvalidDomainName
+	}
+
+	nowDisabled, err := r.domainDisabled(domainName)
+	if err != nil {
+		return err
+	}
+
+	domainDisabledFileName := filepath.Join(r.DirMailDataPath, domainName, FileNameDomainDisable)
+
+	if !nowDisabled && disabled {
+		file, err := os.OpenFile(domainDisabledFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
+		if err != nil {
+			return err
+		}
+		if err := file.Chown(r.uid, r.gid); err != nil {
+			return err
+		}
+		file.Close()
+	}
+
+	if nowDisabled && !disabled {
+		if err := os.Remove(domainDisabledFileName); err != nil {
+			return err
+		}
 	}
 
 	return nil

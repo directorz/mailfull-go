@@ -5,6 +5,7 @@ const (
 	DirNameConfig  = ".mailfull"
 	FileNameConfig = "config"
 
+	FileNameDomainDisable = ".vdomaindisable"
 	FileNameAliasDomains  = ".valiasdomains"
 	FileNameUsersPassword = ".vpasswd"
 	FileNameUserForwards  = ".forward"

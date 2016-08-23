@@ -34,9 +34,10 @@ var (
 	ErrAliasUserNotExist     = errors.New("AliasUser: not exist")
 	ErrAliasUserAlreadyExist = errors.New("AliasUser: already exist")
 
-	ErrInvalidFormatUsersPassword = errors.New("User: password file invalid format")
-	ErrInvalidFormatAliasDomain   = errors.New("AliasDomain: file invalid format")
-	ErrInvalidFormatAliasUsers    = errors.New("AliasUsers: file invalid format")
+	ErrInvalidFormatDomainDisabled = errors.New("Domain: disabled file invalid format")
+	ErrInvalidFormatUsersPassword  = errors.New("User: password file invalid format")
+	ErrInvalidFormatAliasDomain    = errors.New("AliasDomain: file invalid format")
+	ErrInvalidFormatAliasUsers     = errors.New("AliasUsers: file invalid format")
 )
 
 // RepositoryConfig is used to configure a Repository.
