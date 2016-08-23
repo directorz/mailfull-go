@@ -62,6 +62,14 @@ func main() {
 			meta.SubCmdName = c.Subcommand()
 			return &command.DomainDelCommand{Meta: meta}, nil
 		},
+		"domaindisable": func() (cli.Command, error) {
+			meta.SubCmdName = c.Subcommand()
+			return &command.DomainDisableCommand{Meta: meta}, nil
+		},
+		"domainenable": func() (cli.Command, error) {
+			meta.SubCmdName = c.Subcommand()
+			return &command.DomainEnableCommand{Meta: meta}, nil
+		},
 		"aliasdomains": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
 			return &command.AliasDomainsCommand{Meta: meta}, nil
