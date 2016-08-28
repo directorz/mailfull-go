@@ -22,7 +22,7 @@ func (c *UserPasswdCommand) Synopsis() string {
 func (c *UserPasswdCommand) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
-    %s %s address [password]
+    %s %s [-n] address [password]
 
 Description:
     %s
@@ -32,9 +32,11 @@ Required Args:
         The email address that you want to update the password.
 
 Optional Args:
+    -n
+        Don't update databases.
     password
         Specify the password instead of your typing.
-        This option is not recommended because the password will be visible in your shell history.
+        This option is NOT recommended because the password will be visible in your shell history.
 `,
 		c.CmdName, c.SubCmdName,
 		c.Synopsis())
@@ -44,6 +46,12 @@ Optional Args:
 
 // Run runs the command and returns the exit status.
 func (c *UserPasswdCommand) Run(args []string) int {
+	noCommit, err := noCommitFlag(&args)
+	if err != nil {
+		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
+		return 1
+	}
+
 	if len(args) != 1 && len(args) != 2 {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
@@ -113,6 +121,10 @@ func (c *UserPasswdCommand) Run(args []string) int {
 	if err := repo.UserUpdate(domainName, user); err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
+	}
+
+	if noCommit {
+		return 0
 	}
 
 	mailData, err := repo.MailData()

@@ -34,7 +34,7 @@ Required Args:
 Optional Args:
     password
         Specify the password instead of your typing.
-        This option is not recommended because the password will be visible in your shell history.
+        This option is NOT recommended because the password will be visible in your shell history.
 `,
 		c.CmdName, c.SubCmdName,
 		c.Synopsis())

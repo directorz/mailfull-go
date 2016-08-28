@@ -20,7 +20,7 @@ func (c *AliasDomainAddCommand) Synopsis() string {
 func (c *AliasDomainAddCommand) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
-    %s %s domain target
+    %s %s [-n] domain target
 
 Description:
     %s
@@ -30,6 +30,10 @@ Required Args:
         The domain name that you want to create.
     target
         The target domain name.
+
+Optional Args:
+    -n
+        Don't update databases.
 `,
 		c.CmdName, c.SubCmdName,
 		c.Synopsis())
@@ -39,6 +43,12 @@ Required Args:
 
 // Run runs the command and returns the exit status.
 func (c *AliasDomainAddCommand) Run(args []string) int {
+	noCommit, err := noCommitFlag(&args)
+	if err != nil {
+		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
+		return 1
+	}
+
 	if len(args) != 2 {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
@@ -62,6 +72,10 @@ func (c *AliasDomainAddCommand) Run(args []string) int {
 	if err := repo.AliasDomainCreate(aliasDomain); err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
+	}
+
+	if noCommit {
+		return 0
 	}
 
 	mailData, err := repo.MailData()
