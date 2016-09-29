@@ -1,6 +1,0 @@
-gom 'github.com/BurntSushi/toml'
-gom 'github.com/armon/go-radix'
-gom 'github.com/bgentry/speakeasy'
-gom 'github.com/jsimonetti/pwscheme'
-gom 'github.com/mattn/go-isatty'
-gom 'github.com/mitchellh/cli'

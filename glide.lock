@@ -1,0 +1,22 @@
+hash: 451657f03f297af9163863497cf6c2f60abfe12d88a282f5aab6deb865d91119
+updated: 2016-09-29T12:05:32.00075722+09:00
+imports:
+- name: github.com/armon/go-radix
+  version: 4239b77079c7b5d1243b7b4736304ce8ddb6f0f2
+- name: github.com/bgentry/speakeasy
+  version: a1ccbf2c40dfc8ce514b5c5c6e6d1429ea6880da
+- name: github.com/BurntSushi/toml
+  version: 99064174e013895bbd9b025c31100bd1d9b590ca
+- name: github.com/jsimonetti/pwscheme
+  version: 76804708ecad54773871b35dbaa44f517973e395
+  subpackages:
+  - ssha
+- name: github.com/mattn/go-isatty
+  version: 66b8e73f3f5cda9f96b69efd03dd3d7fc4a5cdb8
+- name: github.com/mitchellh/cli
+  version: fcf521421aa29bde1d93b6920dfce826d7932208
+- name: golang.org/x/sys
+  version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
+  subpackages:
+  - unix
+testImports: []

@@ -10,7 +10,7 @@ VERSION=$(patsubst "%",%,$(lastword $(shell grep 'const Version' version.go)))
 default: build
 
 installdeps:
-	gom install
+	glide install -v
 
 build:
 	go build -v -ldflags "-X main.gittag=`git rev-parse --short HEAD`" -o build/mailfull_$(GOOS)_$(GOARCH)/mailfull cmd/mailfull/mailfull.go
