@@ -10,19 +10,19 @@ VERSION=$(patsubst "%",%,$(lastword $(shell grep 'const Version' version.go)))
 default: build
 
 installdeps:
-	gom install
+	glide install -v
 
 build:
 	go build -v -ldflags "-X main.gittag=`git rev-parse --short HEAD`" -o build/mailfull_$(GOOS)_$(GOARCH)/mailfull cmd/mailfull/mailfull.go
 
 build-linux-amd64:
 	docker run --rm -v $(PWD):/go/src/github.com/directorz/mailfull-go -w /go/src/github.com/directorz/mailfull-go \
-	-e GOOS=linux -e GOARCH=amd64 golang:1.7 \
+	-e GOOS=linux -e GOARCH=amd64 golang:1.7.1 \
 	go build -v -ldflags "-X main.gittag=`git rev-parse --short HEAD`" -o "build/mailfull_linux_amd64/mailfull" cmd/mailfull/mailfull.go
 
 build-linux-386:
 	docker run --rm -v $(PWD):/go/src/github.com/directorz/mailfull-go -w /go/src/github.com/directorz/mailfull-go \
-	-e GOOS=linux -e GOARCH=386 golang:1.7 \
+	-e GOOS=linux -e GOARCH=386 golang:1.7.1 \
 	go build -v -ldflags "-X main.gittag=`git rev-parse --short HEAD`" -o "build/mailfull_linux_386/mailfull" cmd/mailfull/mailfull.go
 
 release: release-linux-amd64 release-linux-386
