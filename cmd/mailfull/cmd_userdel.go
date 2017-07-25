@@ -5,11 +5,12 @@ import (
 	"strings"
 
 	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
 // CmdUserDel represents a CmdUserDel.
 type CmdUserDel struct {
-	Meta
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.

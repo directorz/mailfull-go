@@ -5,12 +5,13 @@ import (
 	"strings"
 
 	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 	"github.com/jsimonetti/pwscheme/ssha"
 )
 
 // CmdUserPasswd represents a CmdUserPasswd.
 type CmdUserPasswd struct {
-	Meta
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.

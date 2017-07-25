@@ -4,11 +4,14 @@ Command mailfull is a CLI application using the mailfull package.
 package main
 
 import (
+	"bytes"
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 	"github.com/mitchellh/cli"
 )
 
@@ -30,7 +33,7 @@ func main() {
 		Args:    os.Args[1:],
 	}
 
-	meta := Meta{
+	meta := cmd.Meta{
 		UI: &cli.BasicUi{
 			Reader:      os.Stdin,
 			Writer:      os.Stdout,
@@ -141,4 +144,18 @@ func main() {
 	}
 
 	os.Exit(exitCode)
+}
+
+// noCommitFlag returns true if `pargs` has "-n" flag.
+// `pargs` is overwrites with non-flag arguments.
+func noCommitFlag(pargs *[]string) (bool, error) {
+	nFlag := false
+
+	flagSet := flag.NewFlagSet("", flag.ContinueOnError)
+	flagSet.SetOutput(&bytes.Buffer{})
+	flagSet.BoolVar(&nFlag, "n", nFlag, "")
+	err := flagSet.Parse(*pargs)
+	*pargs = flagSet.Args()
+
+	return nFlag, err
 }

@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 
-	mailfull "github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
 // CmdAliasDomainDel represents a CmdAliasDomainDel.
 type CmdAliasDomainDel struct {
-	Meta
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.

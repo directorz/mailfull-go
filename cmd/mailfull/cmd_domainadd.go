@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
 // CmdDomainAdd represents a CmdDomainAdd.
 type CmdDomainAdd struct {
-	Meta
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.

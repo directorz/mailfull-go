@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"sort"
 
-	mailfull "github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
 // CmdAliasDomains represents a CmdAliasDomains.
 type CmdAliasDomains struct {
-	Meta
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.

@@ -5,11 +5,12 @@ import (
 	"sort"
 
 	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
 // CmdUsers represents a CmdUsers.
 type CmdUsers struct {
-	Meta
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.

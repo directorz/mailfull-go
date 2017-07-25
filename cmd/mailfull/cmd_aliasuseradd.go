@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"strings"
 
-	mailfull "github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
 // CmdAliasUserAdd represents a CmdAliasUserAdd.
 type CmdAliasUserAdd struct {
-	Meta
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.
