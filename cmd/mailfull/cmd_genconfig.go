@@ -6,18 +6,18 @@ import (
 	"github.com/directorz/mailfull-go"
 )
 
-// GenConfigCommand represents a GenConfigCommand.
-type GenConfigCommand struct {
+// CmdGenConfig represents a CmdGenConfig.
+type CmdGenConfig struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *GenConfigCommand) Synopsis() string {
+func (c *CmdGenConfig) Synopsis() string {
 	return "Write a Postfix or Dovecot configuration to stdout."
 }
 
 // Help returns long-form help text.
-func (c *GenConfigCommand) Help() string {
+func (c *CmdGenConfig) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s name
@@ -37,7 +37,7 @@ Required Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *GenConfigCommand) Run(args []string) int {
+func (c *CmdGenConfig) Run(args []string) int {
 	if len(args) != 1 {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1

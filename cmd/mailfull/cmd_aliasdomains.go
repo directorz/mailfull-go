@@ -7,18 +7,18 @@ import (
 	mailfull "github.com/directorz/mailfull-go"
 )
 
-// AliasDomainsCommand represents a AliasDomainsCommand.
-type AliasDomainsCommand struct {
+// CmdAliasDomains represents a CmdAliasDomains.
+type CmdAliasDomains struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *AliasDomainsCommand) Synopsis() string {
+func (c *CmdAliasDomains) Synopsis() string {
 	return "Show aliasdomains."
 }
 
 // Help returns long-form help text.
-func (c *AliasDomainsCommand) Help() string {
+func (c *CmdAliasDomains) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s [domain]
@@ -37,7 +37,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *AliasDomainsCommand) Run(args []string) int {
+func (c *CmdAliasDomains) Run(args []string) int {
 	if len(args) > 1 {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1

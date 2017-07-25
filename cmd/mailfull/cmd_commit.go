@@ -6,18 +6,18 @@ import (
 	"github.com/directorz/mailfull-go"
 )
 
-// CommitCommand represents a CommitCommand.
-type CommitCommand struct {
+// CmdCommit represents a CmdCommit.
+type CmdCommit struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *CommitCommand) Synopsis() string {
+func (c *CmdCommit) Synopsis() string {
 	return "Create databases from the structure of the MailData directory."
 }
 
 // Help returns long-form help text.
-func (c *CommitCommand) Help() string {
+func (c *CmdCommit) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s
@@ -32,7 +32,7 @@ Description:
 }
 
 // Run runs the command and returns the exit status.
-func (c *CommitCommand) Run(args []string) int {
+func (c *CmdCommit) Run(args []string) int {
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)

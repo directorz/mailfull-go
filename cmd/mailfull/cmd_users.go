@@ -7,18 +7,18 @@ import (
 	"github.com/directorz/mailfull-go"
 )
 
-// UsersCommand represents a UsersCommand.
-type UsersCommand struct {
+// CmdUsers represents a CmdUsers.
+type CmdUsers struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *UsersCommand) Synopsis() string {
+func (c *CmdUsers) Synopsis() string {
 	return "Show users."
 }
 
 // Help returns long-form help text.
-func (c *UsersCommand) Help() string {
+func (c *CmdUsers) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s domain
@@ -37,7 +37,7 @@ Required Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *UsersCommand) Run(args []string) int {
+func (c *CmdUsers) Run(args []string) int {
 	if len(args) != 1 {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1

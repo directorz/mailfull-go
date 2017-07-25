@@ -8,18 +8,18 @@ import (
 	"github.com/jsimonetti/pwscheme/ssha"
 )
 
-// UserCheckPwCommand represents a UserCheckPwCommand.
-type UserCheckPwCommand struct {
+// CmdUserCheckPw represents a CmdUserCheckPw.
+type CmdUserCheckPw struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *UserCheckPwCommand) Synopsis() string {
+func (c *CmdUserCheckPw) Synopsis() string {
 	return "Check user's password."
 }
 
 // Help returns long-form help text.
-func (c *UserCheckPwCommand) Help() string {
+func (c *CmdUserCheckPw) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s address [password]
@@ -43,7 +43,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *UserCheckPwCommand) Run(args []string) int {
+func (c *CmdUserCheckPw) Run(args []string) int {
 	if len(args) != 1 && len(args) != 2 {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1

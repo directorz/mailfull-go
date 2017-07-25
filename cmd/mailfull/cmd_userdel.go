@@ -7,18 +7,18 @@ import (
 	"github.com/directorz/mailfull-go"
 )
 
-// UserDelCommand represents a UserDelCommand.
-type UserDelCommand struct {
+// CmdUserDel represents a CmdUserDel.
+type CmdUserDel struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *UserDelCommand) Synopsis() string {
+func (c *CmdUserDel) Synopsis() string {
 	return "Delete and backup a user."
 }
 
 // Help returns long-form help text.
-func (c *UserDelCommand) Help() string {
+func (c *CmdUserDel) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s [-n] address
@@ -41,7 +41,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *UserDelCommand) Run(args []string) int {
+func (c *CmdUserDel) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())

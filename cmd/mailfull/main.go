@@ -43,95 +43,95 @@ func main() {
 	c.Commands = map[string]cli.CommandFactory{
 		"init": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &InitCommand{Meta: meta}, nil
+			return &CmdInit{Meta: meta}, nil
 		},
 		"genconfig": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &GenConfigCommand{Meta: meta}, nil
+			return &CmdGenConfig{Meta: meta}, nil
 		},
 		"domains": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &DomainsCommand{Meta: meta}, nil
+			return &CmdDomains{Meta: meta}, nil
 		},
 		"domainadd": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &DomainAddCommand{Meta: meta}, nil
+			return &CmdDomainAdd{Meta: meta}, nil
 		},
 		"domaindel": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &DomainDelCommand{Meta: meta}, nil
+			return &CmdDomainDel{Meta: meta}, nil
 		},
 		"domaindisable": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &DomainDisableCommand{Meta: meta}, nil
+			return &CmdDomainDisable{Meta: meta}, nil
 		},
 		"domainenable": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &DomainEnableCommand{Meta: meta}, nil
+			return &CmdDomainEnable{Meta: meta}, nil
 		},
 		"aliasdomains": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &AliasDomainsCommand{Meta: meta}, nil
+			return &CmdAliasDomains{Meta: meta}, nil
 		},
 		"aliasdomainadd": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &AliasDomainAddCommand{Meta: meta}, nil
+			return &CmdAliasDomainAdd{Meta: meta}, nil
 		},
 		"aliasdomaindel": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &AliasDomainDelCommand{Meta: meta}, nil
+			return &CmdAliasDomainDel{Meta: meta}, nil
 		},
 		"users": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &UsersCommand{Meta: meta}, nil
+			return &CmdUsers{Meta: meta}, nil
 		},
 		"useradd": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &UserAddCommand{Meta: meta}, nil
+			return &CmdUserAdd{Meta: meta}, nil
 		},
 		"userdel": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &UserDelCommand{Meta: meta}, nil
+			return &CmdUserDel{Meta: meta}, nil
 		},
 		"userpasswd": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &UserPasswdCommand{Meta: meta}, nil
+			return &CmdUserPasswd{Meta: meta}, nil
 		},
 		"usercheckpw": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &UserCheckPwCommand{Meta: meta}, nil
+			return &CmdUserCheckPw{Meta: meta}, nil
 		},
 		"aliasusers": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &AliasUsersCommand{Meta: meta}, nil
+			return &CmdAliasUsers{Meta: meta}, nil
 		},
 		"aliasuseradd": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &AliasUserAddCommand{Meta: meta}, nil
+			return &CmdAliasUserAdd{Meta: meta}, nil
 		},
 		"aliasusermod": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &AliasUserModCommand{Meta: meta}, nil
+			return &CmdAliasUserMod{Meta: meta}, nil
 		},
 		"aliasuserdel": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &AliasUserDelCommand{Meta: meta}, nil
+			return &CmdAliasUserDel{Meta: meta}, nil
 		},
 		"catchall": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &CatchAllCommand{Meta: meta}, nil
+			return &CmdCatchAll{Meta: meta}, nil
 		},
 		"catchallset": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &CatchAllSetCommand{Meta: meta}, nil
+			return &CmdCatchAllSet{Meta: meta}, nil
 		},
 		"catchallunset": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &CatchAllUnsetCommand{Meta: meta}, nil
+			return &CmdCatchAllUnset{Meta: meta}, nil
 		},
 		"commit": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &CommitCommand{Meta: meta}, nil
+			return &CmdCommit{Meta: meta}, nil
 		},
 	}
 

@@ -6,30 +6,28 @@ import (
 	"github.com/directorz/mailfull-go"
 )
 
-// CatchAllSetCommand represents a CatchAllSetCommand.
-type CatchAllSetCommand struct {
+// CmdDomainEnable represents a CmdDomainEnable.
+type CmdDomainEnable struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *CatchAllSetCommand) Synopsis() string {
-	return "Set a catchall user."
+func (c *CmdDomainEnable) Synopsis() string {
+	return "Enable a domain."
 }
 
 // Help returns long-form help text.
-func (c *CatchAllSetCommand) Help() string {
+func (c *CmdDomainEnable) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
-    %s %s [-n] domain user
+    %s %s [-n] domain
 
 Description:
     %s
 
 Required Args:
     domain
-        The domain name.
-    user
-        The user name that you want to set as catchall user.
+        The domain name that you want to enable.
 
 Optional Args:
     -n
@@ -42,20 +40,19 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *CatchAllSetCommand) Run(args []string) int {
+func (c *CmdDomainEnable) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
 	}
 
-	if len(args) != 2 {
+	if len(args) != 1 {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
 	}
 
 	domainName := args[0]
-	userName := args[1]
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
@@ -63,13 +60,19 @@ func (c *CatchAllSetCommand) Run(args []string) int {
 		return 1
 	}
 
-	catchAllUser, err := mailfull.NewCatchAllUser(userName)
+	domain, err := repo.Domain(domainName)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
 	}
+	if domain == nil {
+		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", mailfull.ErrDomainNotExist)
+		return 1
+	}
 
-	if err := repo.CatchAllUserSet(domainName, catchAllUser); err != nil {
+	domain.SetDisabled(false)
+
+	if err := repo.DomainUpdate(domain); err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
 	}

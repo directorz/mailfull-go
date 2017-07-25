@@ -2,30 +2,32 @@ package main
 
 import (
 	"fmt"
-	"sort"
 
 	"github.com/directorz/mailfull-go"
 )
 
-// DomainsCommand represents a DomainsCommand.
-type DomainsCommand struct {
+// CmdCatchAll represents a CmdCatchAll.
+type CmdCatchAll struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *DomainsCommand) Synopsis() string {
-	return "Show domains."
+func (c *CmdCatchAll) Synopsis() string {
+	return "Show a catchall user."
 }
 
 // Help returns long-form help text.
-func (c *DomainsCommand) Help() string {
+func (c *CmdCatchAll) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
-    %s %s
+    %s %s domain
 
 Description:
     %s
-    Disabled domains are marked "!" the beginning.
+
+Required Args:
+    domain
+        The domain name.
 `,
 		c.CmdName, c.SubCmdName,
 		c.Synopsis())
@@ -34,27 +36,28 @@ Description:
 }
 
 // Run runs the command and returns the exit status.
-func (c *DomainsCommand) Run(args []string) int {
+func (c *CmdCatchAll) Run(args []string) int {
+	if len(args) != 1 {
+		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
+		return 1
+	}
+
+	domainName := args[0]
+
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
 	}
 
-	domains, err := repo.Domains()
+	catchAllUser, err := repo.CatchAllUser(domainName)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
 	}
-	sort.Sort(mailfull.DomainSlice(domains))
 
-	for _, domain := range domains {
-		disableStr := ""
-		if domain.Disabled() {
-			disableStr = "!"
-		}
-
-		fmt.Fprintf(c.UI.Writer, "%s%s\n", disableStr, domain.Name())
+	if catchAllUser != nil {
+		fmt.Fprintf(c.UI.Writer, "%s\n", catchAllUser.Name())
 	}
 
 	return 0

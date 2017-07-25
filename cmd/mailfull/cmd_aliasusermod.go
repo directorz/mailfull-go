@@ -7,18 +7,18 @@ import (
 	mailfull "github.com/directorz/mailfull-go"
 )
 
-// AliasUserModCommand represents a AliasUserModCommand.
-type AliasUserModCommand struct {
+// CmdAliasUserMod represents a CmdAliasUserMod.
+type CmdAliasUserMod struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *AliasUserModCommand) Synopsis() string {
+func (c *CmdAliasUserMod) Synopsis() string {
 	return "Modify a aliasuser."
 }
 
 // Help returns long-form help text.
-func (c *AliasUserModCommand) Help() string {
+func (c *CmdAliasUserMod) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s [-n] address target [target...]
@@ -43,7 +43,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *AliasUserModCommand) Run(args []string) int {
+func (c *CmdAliasUserMod) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())

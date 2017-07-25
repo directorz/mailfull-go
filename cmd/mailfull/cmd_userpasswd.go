@@ -8,18 +8,18 @@ import (
 	"github.com/jsimonetti/pwscheme/ssha"
 )
 
-// UserPasswdCommand represents a UserPasswdCommand.
-type UserPasswdCommand struct {
+// CmdUserPasswd represents a CmdUserPasswd.
+type CmdUserPasswd struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *UserPasswdCommand) Synopsis() string {
+func (c *CmdUserPasswd) Synopsis() string {
 	return "Update user's password."
 }
 
 // Help returns long-form help text.
-func (c *UserPasswdCommand) Help() string {
+func (c *CmdUserPasswd) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s [-n] address [password]
@@ -45,7 +45,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *UserPasswdCommand) Run(args []string) int {
+func (c *CmdUserPasswd) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())

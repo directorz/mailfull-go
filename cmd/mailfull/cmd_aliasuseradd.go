@@ -7,28 +7,30 @@ import (
 	mailfull "github.com/directorz/mailfull-go"
 )
 
-// AliasUserDelCommand represents a AliasUserDelCommand.
-type AliasUserDelCommand struct {
+// CmdAliasUserAdd represents a CmdAliasUserAdd.
+type CmdAliasUserAdd struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *AliasUserDelCommand) Synopsis() string {
-	return "Delete a aliasuser."
+func (c *CmdAliasUserAdd) Synopsis() string {
+	return "Create a new aliasuser."
 }
 
 // Help returns long-form help text.
-func (c *AliasUserDelCommand) Help() string {
+func (c *CmdAliasUserAdd) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
-    %s %s [-n] address
+    %s %s [-n] address target [target...]
 
 Description:
     %s
 
 Required Args:
     address
-        The email address that you want to delete.
+        The email address that you want to create.
+    target
+        Target email addresses.
 
 Optional Args:
     -n
@@ -41,19 +43,21 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *AliasUserDelCommand) Run(args []string) int {
+func (c *CmdAliasUserAdd) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
 	}
 
-	if len(args) != 1 {
+	if len(args) < 2 {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
 	}
 
 	address := args[0]
+	targets := args[1:]
+
 	words := strings.Split(address, "@")
 	if len(words) != 2 {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
@@ -68,7 +72,13 @@ func (c *AliasUserDelCommand) Run(args []string) int {
 		return 1
 	}
 
-	if err := repo.AliasUserRemove(domainName, aliasUserName); err != nil {
+	aliasUser, err := mailfull.NewAliasUser(aliasUserName, targets)
+	if err != nil {
+		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		return 1
+	}
+
+	if err := repo.AliasUserCreate(domainName, aliasUser); err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
 	}

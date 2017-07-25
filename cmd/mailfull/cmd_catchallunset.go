@@ -6,18 +6,18 @@ import (
 	"github.com/directorz/mailfull-go"
 )
 
-// DomainAddCommand represents a DomainAddCommand.
-type DomainAddCommand struct {
+// CmdCatchAllUnset represents a CmdCatchAllUnset.
+type CmdCatchAllUnset struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *DomainAddCommand) Synopsis() string {
-	return "Create a new domain and postmaster."
+func (c *CmdCatchAllUnset) Synopsis() string {
+	return "Unset a catchall user."
 }
 
 // Help returns long-form help text.
-func (c *DomainAddCommand) Help() string {
+func (c *CmdCatchAllUnset) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s [-n] domain
@@ -27,7 +27,7 @@ Description:
 
 Required Args:
     domain
-        The domain name that you want to create.
+        The domain name.
 
 Optional Args:
     -n
@@ -40,7 +40,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *DomainAddCommand) Run(args []string) int {
+func (c *CmdCatchAllUnset) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
@@ -60,24 +60,7 @@ func (c *DomainAddCommand) Run(args []string) int {
 		return 1
 	}
 
-	domain, err := mailfull.NewDomain(domainName)
-	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
-		return 1
-	}
-
-	if err := repo.DomainCreate(domain); err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
-		return 1
-	}
-
-	user, err := mailfull.NewUser("postmaster", mailfull.NeverMatchHashedPassword, nil)
-	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
-		return 1
-	}
-
-	if err := repo.UserCreate(domainName, user); err != nil {
+	if err := repo.CatchAllUserUnset(domainName); err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
 	}
