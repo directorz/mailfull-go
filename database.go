@@ -9,33 +9,84 @@ import (
 	"strings"
 )
 
-// GenerateDatabases generates databases from the MailData directory.
-func (r *Repository) GenerateDatabases(md *MailData) error {
-	sort.Slice(md.Domains, func(i, j int) bool { return md.Domains[i].Name() < md.Domains[j].Name() })
-	sort.Slice(md.AliasDomains, func(i, j int) bool { return md.AliasDomains[i].Name() < md.AliasDomains[j].Name() })
+// repoData represents a repoData.
+type repoData struct {
+	Domains      []*Domain
+	AliasDomains []*AliasDomain
+}
 
-	for _, domain := range md.Domains {
+// repoData returns a repoData.
+func (r *Repository) repoData() (*repoData, error) {
+	domains, err := r.Domains()
+	if err != nil {
+		return nil, err
+	}
+
+	aliasDomains, err := r.AliasDomains()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, domain := range domains {
+		users, err := r.Users(domain.Name())
+		if err != nil {
+			return nil, err
+		}
+		domain.Users = users
+
+		aliasUsers, err := r.AliasUsers(domain.Name())
+		if err != nil {
+			return nil, err
+		}
+		domain.AliasUsers = aliasUsers
+
+		catchAllUser, err := r.CatchAllUser(domain.Name())
+		if err != nil {
+			return nil, err
+		}
+		domain.CatchAllUser = catchAllUser
+	}
+
+	rd := &repoData{
+		Domains:      domains,
+		AliasDomains: aliasDomains,
+	}
+
+	return rd, nil
+}
+
+// GenerateDatabases generates databases from the Repository.
+func (r *Repository) GenerateDatabases() error {
+	rd, err := r.repoData()
+	if err != nil {
+		return err
+	}
+
+	sort.Slice(rd.Domains, func(i, j int) bool { return rd.Domains[i].Name() < rd.Domains[j].Name() })
+	sort.Slice(rd.AliasDomains, func(i, j int) bool { return rd.AliasDomains[i].Name() < rd.AliasDomains[j].Name() })
+
+	for _, domain := range rd.Domains {
 		sort.Slice(domain.Users, func(i, j int) bool { return domain.Users[i].Name() < domain.Users[j].Name() })
 		sort.Slice(domain.AliasUsers, func(i, j int) bool { return domain.AliasUsers[i].Name() < domain.AliasUsers[j].Name() })
 	}
 
 	// Generate files
-	if err := r.generateDbDomains(md); err != nil {
+	if err := r.generateDbDomains(rd); err != nil {
 		return err
 	}
-	if err := r.generateDbDestinations(md); err != nil {
+	if err := r.generateDbDestinations(rd); err != nil {
 		return err
 	}
-	if err := r.generateDbMaildirs(md); err != nil {
+	if err := r.generateDbMaildirs(rd); err != nil {
 		return err
 	}
-	if err := r.generateDbLocaltable(md); err != nil {
+	if err := r.generateDbLocaltable(rd); err != nil {
 		return err
 	}
-	if err := r.generateDbForwards(md); err != nil {
+	if err := r.generateDbForwards(rd); err != nil {
 		return err
 	}
-	if err := r.generateDbPasswords(md); err != nil {
+	if err := r.generateDbPasswords(rd); err != nil {
 		return err
 	}
 
@@ -59,7 +110,7 @@ func (r *Repository) GenerateDatabases(md *MailData) error {
 	return nil
 }
 
-func (r *Repository) generateDbDomains(md *MailData) error {
+func (r *Repository) generateDbDomains(rd *repoData) error {
 	dbDomains, err := os.Create(filepath.Join(r.DirDatabasePath, FileNameDbDomains))
 	if err != nil {
 		return err
@@ -69,7 +120,7 @@ func (r *Repository) generateDbDomains(md *MailData) error {
 	}
 	defer dbDomains.Close()
 
-	for _, domain := range md.Domains {
+	for _, domain := range rd.Domains {
 		if domain.Disabled() {
 			continue
 		}
@@ -79,7 +130,7 @@ func (r *Repository) generateDbDomains(md *MailData) error {
 		}
 	}
 
-	for _, aliasDomain := range md.AliasDomains {
+	for _, aliasDomain := range rd.AliasDomains {
 		if _, err := fmt.Fprintf(dbDomains, "%s virtual\n", aliasDomain.Name()); err != nil {
 			return err
 		}
@@ -88,7 +139,7 @@ func (r *Repository) generateDbDomains(md *MailData) error {
 	return nil
 }
 
-func (r *Repository) generateDbDestinations(md *MailData) error {
+func (r *Repository) generateDbDestinations(rd *repoData) error {
 	dbDestinations, err := os.Create(filepath.Join(r.DirDatabasePath, FileNameDbDestinations))
 	if err != nil {
 		return err
@@ -98,7 +149,7 @@ func (r *Repository) generateDbDestinations(md *MailData) error {
 	}
 	defer dbDestinations.Close()
 
-	for _, domain := range md.Domains {
+	for _, domain := range rd.Domains {
 		if domain.Disabled() {
 			continue
 		}
@@ -123,7 +174,7 @@ func (r *Repository) generateDbDestinations(md *MailData) error {
 				}
 			}
 
-			for _, aliasDomain := range md.AliasDomains {
+			for _, aliasDomain := range rd.AliasDomains {
 				if aliasDomain.Target() == domain.Name() {
 					if _, err := fmt.Fprintf(dbDestinations, "%s@%s %s@%s\n", userName, aliasDomain.Name(), user.Name(), domain.Name()); err != nil {
 						return err
@@ -137,7 +188,7 @@ func (r *Repository) generateDbDestinations(md *MailData) error {
 				return err
 			}
 
-			for _, aliasDomain := range md.AliasDomains {
+			for _, aliasDomain := range rd.AliasDomains {
 				if aliasDomain.Target() == domain.Name() {
 					if _, err := fmt.Fprintf(dbDestinations, "%s@%s %s@%s\n", aliasUser.Name(), aliasDomain.Name(), aliasUser.Name(), domain.Name()); err != nil {
 						return err
@@ -150,7 +201,7 @@ func (r *Repository) generateDbDestinations(md *MailData) error {
 	return nil
 }
 
-func (r *Repository) generateDbMaildirs(md *MailData) error {
+func (r *Repository) generateDbMaildirs(rd *repoData) error {
 	dbMaildirs, err := os.Create(filepath.Join(r.DirDatabasePath, FileNameDbMaildirs))
 	if err != nil {
 		return err
@@ -160,7 +211,7 @@ func (r *Repository) generateDbMaildirs(md *MailData) error {
 	}
 	defer dbMaildirs.Close()
 
-	for _, domain := range md.Domains {
+	for _, domain := range rd.Domains {
 		if domain.Disabled() {
 			continue
 		}
@@ -175,7 +226,7 @@ func (r *Repository) generateDbMaildirs(md *MailData) error {
 	return nil
 }
 
-func (r *Repository) generateDbLocaltable(md *MailData) error {
+func (r *Repository) generateDbLocaltable(rd *repoData) error {
 	dbLocaltable, err := os.Create(filepath.Join(r.DirDatabasePath, FileNameDbLocaltable))
 	if err != nil {
 		return err
@@ -185,7 +236,7 @@ func (r *Repository) generateDbLocaltable(md *MailData) error {
 	}
 	defer dbLocaltable.Close()
 
-	for _, domain := range md.Domains {
+	for _, domain := range rd.Domains {
 		if domain.Disabled() {
 			continue
 		}
@@ -203,7 +254,7 @@ func (r *Repository) generateDbLocaltable(md *MailData) error {
 	return nil
 }
 
-func (r *Repository) generateDbForwards(md *MailData) error {
+func (r *Repository) generateDbForwards(rd *repoData) error {
 	dbForwards, err := os.Create(filepath.Join(r.DirDatabasePath, FileNameDbForwards))
 	if err != nil {
 		return err
@@ -213,7 +264,7 @@ func (r *Repository) generateDbForwards(md *MailData) error {
 	}
 	defer dbForwards.Close()
 
-	for _, domain := range md.Domains {
+	for _, domain := range rd.Domains {
 		if domain.Disabled() {
 			continue
 		}
@@ -243,7 +294,7 @@ func (r *Repository) generateDbForwards(md *MailData) error {
 	return nil
 }
 
-func (r *Repository) generateDbPasswords(md *MailData) error {
+func (r *Repository) generateDbPasswords(rd *repoData) error {
 	dbPasswords, err := os.Create(filepath.Join(r.DirDatabasePath, FileNameDbPasswords))
 	if err != nil {
 		return err
@@ -253,7 +304,7 @@ func (r *Repository) generateDbPasswords(md *MailData) error {
 	}
 	defer dbPasswords.Close()
 
-	for _, domain := range md.Domains {
+	for _, domain := range rd.Domains {
 		if domain.Disabled() {
 			continue
 		}

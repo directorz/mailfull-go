@@ -40,14 +40,7 @@ func (c *CmdCommit) Run(args []string) int {
 		return 1
 	}
 
-	mailData, err := repo.MailData()
-	if err != nil {
-		c.Meta.Errorf("%v\n", err)
-		return 1
-	}
-
-	err = repo.GenerateDatabases(mailData)
-	if err != nil {
+	if err = repo.GenerateDatabases(); err != nil {
 		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
