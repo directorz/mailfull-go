@@ -67,24 +67,24 @@ func (c *CmdUserCheckPw) Run(args []string) int {
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	user, err := repo.User(domainName, userName)
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 	if user == nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", mailfull.ErrUserNotExist)
+		c.Meta.Errorf("%v\n", mailfull.ErrUserNotExist)
 		return 1
 	}
 
 	if len(args) != 2 {
 		input, err := c.UI.AskSecret(fmt.Sprintf("Enter password for %s:", address))
 		if err != nil {
-			fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+			c.Meta.Errorf("%v\n", err)
 			return 1
 		}
 

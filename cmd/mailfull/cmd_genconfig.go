@@ -48,7 +48,7 @@ func (c *CmdGenConfig) Run(args []string) int {
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
@@ -60,7 +60,7 @@ func (c *CmdGenConfig) Run(args []string) int {
 		fmt.Fprintf(c.UI.Writer, "%s", repo.GenerateConfigDovecot())
 
 	default:
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] Specify \"postfix\" or \"dovecot\".\n")
+		c.Meta.Errorf("Specify \"postfix\" or \"dovecot\".\n")
 		return 1
 	}
 

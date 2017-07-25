@@ -35,7 +35,7 @@ Description:
 // Run runs the command and returns the exit status.
 func (c *CmdInit) Run(args []string) int {
 	if err := mailfull.InitRepository("."); err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
