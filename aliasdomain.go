@@ -15,13 +15,6 @@ type AliasDomain struct {
 	target string
 }
 
-// AliasDomainSlice attaches the methods of sort.Interface to []*AliasDomain.
-type AliasDomainSlice []*AliasDomain
-
-func (p AliasDomainSlice) Len() int           { return len(p) }
-func (p AliasDomainSlice) Less(i, j int) bool { return p[i].Name() < p[j].Name() }
-func (p AliasDomainSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
-
 // NewAliasDomain creates a new AliasDomain instance.
 func NewAliasDomain(name, target string) (*AliasDomain, error) {
 	ad := &AliasDomain{}
@@ -190,7 +183,7 @@ func (r *Repository) writeAliasDomainsFile(aliasDomains []*AliasDomain) error {
 	}
 	defer file.Close()
 
-	sort.Sort(AliasDomainSlice(aliasDomains))
+	sort.Slice(aliasDomains, func(i, j int) bool { return aliasDomains[i].Name() < aliasDomains[j].Name() })
 
 	for _, aliasDomain := range aliasDomains {
 		if _, err := fmt.Fprintf(file, "%s:%s\n", aliasDomain.Name(), aliasDomain.Target()); err != nil {
