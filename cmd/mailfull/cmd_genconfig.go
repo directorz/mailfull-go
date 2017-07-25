@@ -1,23 +1,24 @@
-package command
+package main
 
 import (
 	"fmt"
 
 	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
-// GenConfigCommand represents a GenConfigCommand.
-type GenConfigCommand struct {
-	Meta
+// CmdGenConfig represents a CmdGenConfig.
+type CmdGenConfig struct {
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *GenConfigCommand) Synopsis() string {
+func (c *CmdGenConfig) Synopsis() string {
 	return "Write a Postfix or Dovecot configuration to stdout."
 }
 
 // Help returns long-form help text.
-func (c *GenConfigCommand) Help() string {
+func (c *CmdGenConfig) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s name
@@ -37,7 +38,7 @@ Required Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *GenConfigCommand) Run(args []string) int {
+func (c *CmdGenConfig) Run(args []string) int {
 	if len(args) != 1 {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
@@ -47,7 +48,7 @@ func (c *GenConfigCommand) Run(args []string) int {
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
@@ -59,7 +60,7 @@ func (c *GenConfigCommand) Run(args []string) int {
 		fmt.Fprintf(c.UI.Writer, "%s", repo.GenerateConfigDovecot())
 
 	default:
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] Specify \"postfix\" or \"dovecot\".\n")
+		c.Meta.Errorf("Specify \"postfix\" or \"dovecot\".\n")
 		return 1
 	}
 

@@ -1,23 +1,24 @@
-package command
+package main
 
 import (
 	"fmt"
 
 	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
-// CatchAllUnsetCommand represents a CatchAllUnsetCommand.
-type CatchAllUnsetCommand struct {
-	Meta
+// CmdCatchAllUnset represents a CmdCatchAllUnset.
+type CmdCatchAllUnset struct {
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *CatchAllUnsetCommand) Synopsis() string {
+func (c *CmdCatchAllUnset) Synopsis() string {
 	return "Unset a catchall user."
 }
 
 // Help returns long-form help text.
-func (c *CatchAllUnsetCommand) Help() string {
+func (c *CmdCatchAllUnset) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s [-n] domain
@@ -40,7 +41,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *CatchAllUnsetCommand) Run(args []string) int {
+func (c *CmdCatchAllUnset) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
@@ -56,12 +57,12 @@ func (c *CatchAllUnsetCommand) Run(args []string) int {
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	if err := repo.CatchAllUserUnset(domainName); err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
@@ -71,13 +72,13 @@ func (c *CatchAllUnsetCommand) Run(args []string) int {
 
 	mailData, err := repo.MailData()
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	err = repo.GenerateDatabases(mailData)
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 

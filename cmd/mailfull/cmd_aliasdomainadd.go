@@ -1,35 +1,36 @@
-package command
+package main
 
 import (
 	"fmt"
 
 	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
-// CatchAllSetCommand represents a CatchAllSetCommand.
-type CatchAllSetCommand struct {
-	Meta
+// CmdAliasDomainAdd represents a CmdAliasDomainAdd.
+type CmdAliasDomainAdd struct {
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *CatchAllSetCommand) Synopsis() string {
-	return "Set a catchall user."
+func (c *CmdAliasDomainAdd) Synopsis() string {
+	return "Create a new aliasdomain."
 }
 
 // Help returns long-form help text.
-func (c *CatchAllSetCommand) Help() string {
+func (c *CmdAliasDomainAdd) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
-    %s %s [-n] domain user
+    %s %s [-n] domain target
 
 Description:
     %s
 
 Required Args:
     domain
-        The domain name.
-    user
-        The user name that you want to set as catchall user.
+        The domain name that you want to create.
+    target
+        The target domain name.
 
 Optional Args:
     -n
@@ -42,7 +43,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *CatchAllSetCommand) Run(args []string) int {
+func (c *CmdAliasDomainAdd) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
@@ -54,23 +55,23 @@ func (c *CatchAllSetCommand) Run(args []string) int {
 		return 1
 	}
 
-	domainName := args[0]
-	userName := args[1]
+	aliasDomainName := args[0]
+	targetDomainName := args[1]
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
-	catchAllUser, err := mailfull.NewCatchAllUser(userName)
+	aliasDomain, err := mailfull.NewAliasDomain(aliasDomainName, targetDomainName)
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
-	if err := repo.CatchAllUserSet(domainName, catchAllUser); err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+	if err := repo.AliasDomainCreate(aliasDomain); err != nil {
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
@@ -80,13 +81,13 @@ func (c *CatchAllSetCommand) Run(args []string) int {
 
 	mailData, err := repo.MailData()
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	err = repo.GenerateDatabases(mailData)
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 

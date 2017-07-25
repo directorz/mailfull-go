@@ -1,23 +1,24 @@
-package command
+package main
 
 import (
 	"fmt"
 
 	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
-// CommitCommand represents a CommitCommand.
-type CommitCommand struct {
-	Meta
+// CmdCommit represents a CmdCommit.
+type CmdCommit struct {
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *CommitCommand) Synopsis() string {
+func (c *CmdCommit) Synopsis() string {
 	return "Create databases from the structure of the MailData directory."
 }
 
 // Help returns long-form help text.
-func (c *CommitCommand) Help() string {
+func (c *CmdCommit) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s
@@ -32,22 +33,22 @@ Description:
 }
 
 // Run runs the command and returns the exit status.
-func (c *CommitCommand) Run(args []string) int {
+func (c *CmdCommit) Run(args []string) int {
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	mailData, err := repo.MailData()
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	err = repo.GenerateDatabases(mailData)
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 

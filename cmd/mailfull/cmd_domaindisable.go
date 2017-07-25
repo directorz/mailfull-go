@@ -1,23 +1,24 @@
-package command
+package main
 
 import (
 	"fmt"
 
-	mailfull "github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
-// AliasDomainDelCommand represents a AliasDomainDelCommand.
-type AliasDomainDelCommand struct {
-	Meta
+// CmdDomainDisable represents a CmdDomainDisable.
+type CmdDomainDisable struct {
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *AliasDomainDelCommand) Synopsis() string {
-	return "Delete a aliasdomain."
+func (c *CmdDomainDisable) Synopsis() string {
+	return "Disable a domain temporarily."
 }
 
 // Help returns long-form help text.
-func (c *AliasDomainDelCommand) Help() string {
+func (c *CmdDomainDisable) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s [-n] domain
@@ -27,7 +28,7 @@ Description:
 
 Required Args:
     domain
-        The domain name that you want to delete.
+        The domain name that you want to disable.
 
 Optional Args:
     -n
@@ -40,7 +41,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *AliasDomainDelCommand) Run(args []string) int {
+func (c *CmdDomainDisable) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
@@ -52,16 +53,28 @@ func (c *AliasDomainDelCommand) Run(args []string) int {
 		return 1
 	}
 
-	aliasDomainName := args[0]
+	domainName := args[0]
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
-	if err := repo.AliasDomainRemove(aliasDomainName); err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+	domain, err := repo.Domain(domainName)
+	if err != nil {
+		c.Meta.Errorf("%v\n", err)
+		return 1
+	}
+	if domain == nil {
+		c.Meta.Errorf("%v\n", mailfull.ErrDomainNotExist)
+		return 1
+	}
+
+	domain.SetDisabled(true)
+
+	if err := repo.DomainUpdate(domain); err != nil {
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
@@ -71,13 +84,13 @@ func (c *AliasDomainDelCommand) Run(args []string) int {
 
 	mailData, err := repo.MailData()
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	err = repo.GenerateDatabases(mailData)
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 

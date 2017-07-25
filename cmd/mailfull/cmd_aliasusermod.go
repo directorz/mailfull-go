@@ -1,24 +1,25 @@
-package command
+package main
 
 import (
 	"fmt"
 	"strings"
 
-	mailfull "github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
-// AliasUserModCommand represents a AliasUserModCommand.
-type AliasUserModCommand struct {
-	Meta
+// CmdAliasUserMod represents a CmdAliasUserMod.
+type CmdAliasUserMod struct {
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *AliasUserModCommand) Synopsis() string {
+func (c *CmdAliasUserMod) Synopsis() string {
 	return "Modify a aliasuser."
 }
 
 // Help returns long-form help text.
-func (c *AliasUserModCommand) Help() string {
+func (c *CmdAliasUserMod) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s [-n] address target [target...]
@@ -43,7 +44,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *AliasUserModCommand) Run(args []string) int {
+func (c *CmdAliasUserMod) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
@@ -68,27 +69,27 @@ func (c *AliasUserModCommand) Run(args []string) int {
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	aliasUser, err := repo.AliasUser(domainName, aliasUserName)
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 	if aliasUser == nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", mailfull.ErrAliasUserNotExist)
+		c.Meta.Errorf("%v\n", mailfull.ErrAliasUserNotExist)
 		return 1
 	}
 
 	if err := aliasUser.SetTargets(targets); err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	if err := repo.AliasUserUpdate(domainName, aliasUser); err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
@@ -98,13 +99,13 @@ func (c *AliasUserModCommand) Run(args []string) int {
 
 	mailData, err := repo.MailData()
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	err = repo.GenerateDatabases(mailData)
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 

@@ -1,25 +1,26 @@
-package command
+package main
 
 import (
 	"fmt"
 	"strings"
 
 	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 	"github.com/jsimonetti/pwscheme/ssha"
 )
 
-// UserPasswdCommand represents a UserPasswdCommand.
-type UserPasswdCommand struct {
-	Meta
+// CmdUserPasswd represents a CmdUserPasswd.
+type CmdUserPasswd struct {
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *UserPasswdCommand) Synopsis() string {
+func (c *CmdUserPasswd) Synopsis() string {
 	return "Update user's password."
 }
 
 // Help returns long-form help text.
-func (c *UserPasswdCommand) Help() string {
+func (c *CmdUserPasswd) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s [-n] address [password]
@@ -45,7 +46,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *UserPasswdCommand) Run(args []string) int {
+func (c *CmdUserPasswd) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
@@ -74,33 +75,33 @@ func (c *UserPasswdCommand) Run(args []string) int {
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	user, err := repo.User(domainName, userName)
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 	if user == nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", mailfull.ErrUserNotExist)
+		c.Meta.Errorf("%v\n", mailfull.ErrUserNotExist)
 		return 1
 	}
 
 	if len(args) != 2 {
 		input1, err := c.UI.AskSecret(fmt.Sprintf("Enter new password for %s:", address))
 		if err != nil {
-			fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+			c.Meta.Errorf("%v\n", err)
 			return 1
 		}
 		input2, err := c.UI.AskSecret("Retype new password:")
 		if err != nil {
-			fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+			c.Meta.Errorf("%v\n", err)
 			return 1
 		}
 		if input1 != input2 {
-			fmt.Fprintf(c.UI.ErrorWriter, "[ERR] inputs do not match.\n")
+			c.Meta.Errorf("inputs do not match.\n")
 			return 1
 		}
 		rawPassword = input1
@@ -110,7 +111,7 @@ func (c *UserPasswdCommand) Run(args []string) int {
 	if rawPassword != "" {
 		str, err := ssha.Generate(rawPassword, 4)
 		if err != nil {
-			fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+			c.Meta.Errorf("%v\n", err)
 			return 1
 		}
 		hashedPassword = str
@@ -119,7 +120,7 @@ func (c *UserPasswdCommand) Run(args []string) int {
 	user.SetHashedPassword(hashedPassword)
 
 	if err := repo.UserUpdate(domainName, user); err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
@@ -129,13 +130,13 @@ func (c *UserPasswdCommand) Run(args []string) int {
 
 	mailData, err := repo.MailData()
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	err = repo.GenerateDatabases(mailData)
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 

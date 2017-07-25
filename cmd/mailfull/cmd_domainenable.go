@@ -1,23 +1,24 @@
-package command
+package main
 
 import (
 	"fmt"
 
 	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
-// DomainDisableCommand represents a DomainDisableCommand.
-type DomainDisableCommand struct {
-	Meta
+// CmdDomainEnable represents a CmdDomainEnable.
+type CmdDomainEnable struct {
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *DomainDisableCommand) Synopsis() string {
-	return "Disable a domain temporarily."
+func (c *CmdDomainEnable) Synopsis() string {
+	return "Enable a domain."
 }
 
 // Help returns long-form help text.
-func (c *DomainDisableCommand) Help() string {
+func (c *CmdDomainEnable) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s [-n] domain
@@ -27,7 +28,7 @@ Description:
 
 Required Args:
     domain
-        The domain name that you want to disable.
+        The domain name that you want to enable.
 
 Optional Args:
     -n
@@ -40,7 +41,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *DomainDisableCommand) Run(args []string) int {
+func (c *CmdDomainEnable) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
@@ -56,24 +57,24 @@ func (c *DomainDisableCommand) Run(args []string) int {
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	domain, err := repo.Domain(domainName)
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 	if domain == nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", mailfull.ErrDomainNotExist)
+		c.Meta.Errorf("%v\n", mailfull.ErrDomainNotExist)
 		return 1
 	}
 
-	domain.SetDisabled(true)
+	domain.SetDisabled(false)
 
 	if err := repo.DomainUpdate(domain); err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
@@ -83,13 +84,13 @@ func (c *DomainDisableCommand) Run(args []string) int {
 
 	mailData, err := repo.MailData()
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	err = repo.GenerateDatabases(mailData)
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 

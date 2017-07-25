@@ -1,24 +1,25 @@
-package command
+package main
 
 import (
 	"fmt"
 	"strings"
 
-	mailfull "github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
-// AliasUserDelCommand represents a AliasUserDelCommand.
-type AliasUserDelCommand struct {
-	Meta
+// CmdAliasUserDel represents a CmdAliasUserDel.
+type CmdAliasUserDel struct {
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *AliasUserDelCommand) Synopsis() string {
+func (c *CmdAliasUserDel) Synopsis() string {
 	return "Delete a aliasuser."
 }
 
 // Help returns long-form help text.
-func (c *AliasUserDelCommand) Help() string {
+func (c *CmdAliasUserDel) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s [-n] address
@@ -41,7 +42,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *AliasUserDelCommand) Run(args []string) int {
+func (c *CmdAliasUserDel) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
@@ -64,12 +65,12 @@ func (c *AliasUserDelCommand) Run(args []string) int {
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	if err := repo.AliasUserRemove(domainName, aliasUserName); err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
@@ -79,13 +80,13 @@ func (c *AliasUserDelCommand) Run(args []string) int {
 
 	mailData, err := repo.MailData()
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	err = repo.GenerateDatabases(mailData)
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 

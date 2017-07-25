@@ -1,24 +1,25 @@
-package command
+package main
 
 import (
 	"fmt"
 	"sort"
 
 	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
-// DomainsCommand represents a DomainsCommand.
-type DomainsCommand struct {
-	Meta
+// CmdDomains represents a CmdDomains.
+type CmdDomains struct {
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *DomainsCommand) Synopsis() string {
+func (c *CmdDomains) Synopsis() string {
 	return "Show domains."
 }
 
 // Help returns long-form help text.
-func (c *DomainsCommand) Help() string {
+func (c *CmdDomains) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s
@@ -34,16 +35,16 @@ Description:
 }
 
 // Run runs the command and returns the exit status.
-func (c *DomainsCommand) Run(args []string) int {
+func (c *CmdDomains) Run(args []string) int {
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	domains, err := repo.Domains()
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 	sort.Sort(mailfull.DomainSlice(domains))

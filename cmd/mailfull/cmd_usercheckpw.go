@@ -1,25 +1,26 @@
-package command
+package main
 
 import (
 	"fmt"
 	"strings"
 
 	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 	"github.com/jsimonetti/pwscheme/ssha"
 )
 
-// UserCheckPwCommand represents a UserCheckPwCommand.
-type UserCheckPwCommand struct {
-	Meta
+// CmdUserCheckPw represents a CmdUserCheckPw.
+type CmdUserCheckPw struct {
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *UserCheckPwCommand) Synopsis() string {
+func (c *CmdUserCheckPw) Synopsis() string {
 	return "Check user's password."
 }
 
 // Help returns long-form help text.
-func (c *UserCheckPwCommand) Help() string {
+func (c *CmdUserCheckPw) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s address [password]
@@ -43,7 +44,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *UserCheckPwCommand) Run(args []string) int {
+func (c *CmdUserCheckPw) Run(args []string) int {
 	if len(args) != 1 && len(args) != 2 {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
@@ -66,24 +67,24 @@ func (c *UserCheckPwCommand) Run(args []string) int {
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	user, err := repo.User(domainName, userName)
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 	if user == nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", mailfull.ErrUserNotExist)
+		c.Meta.Errorf("%v\n", mailfull.ErrUserNotExist)
 		return 1
 	}
 
 	if len(args) != 2 {
 		input, err := c.UI.AskSecret(fmt.Sprintf("Enter password for %s:", address))
 		if err != nil {
-			fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+			c.Meta.Errorf("%v\n", err)
 			return 1
 		}
 

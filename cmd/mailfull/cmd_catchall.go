@@ -1,24 +1,24 @@
-package command
+package main
 
 import (
 	"fmt"
-	"sort"
 
 	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
-// UsersCommand represents a UsersCommand.
-type UsersCommand struct {
-	Meta
+// CmdCatchAll represents a CmdCatchAll.
+type CmdCatchAll struct {
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *UsersCommand) Synopsis() string {
-	return "Show users."
+func (c *CmdCatchAll) Synopsis() string {
+	return "Show a catchall user."
 }
 
 // Help returns long-form help text.
-func (c *UsersCommand) Help() string {
+func (c *CmdCatchAll) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s domain
@@ -37,29 +37,28 @@ Required Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *UsersCommand) Run(args []string) int {
+func (c *CmdCatchAll) Run(args []string) int {
 	if len(args) != 1 {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
 	}
 
-	targetDomainName := args[0]
+	domainName := args[0]
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
-	users, err := repo.Users(targetDomainName)
+	catchAllUser, err := repo.CatchAllUser(domainName)
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
-	sort.Sort(mailfull.UserSlice(users))
 
-	for _, user := range users {
-		fmt.Fprintf(c.UI.Writer, "%s\n", user.Name())
+	if catchAllUser != nil {
+		fmt.Fprintf(c.UI.Writer, "%s\n", catchAllUser.Name())
 	}
 
 	return 0

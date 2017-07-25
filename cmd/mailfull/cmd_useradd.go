@@ -1,24 +1,25 @@
-package command
+package main
 
 import (
 	"fmt"
 	"strings"
 
 	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
-// UserAddCommand represents a UserAddCommand.
-type UserAddCommand struct {
-	Meta
+// CmdUserAdd represents a CmdUserAdd.
+type CmdUserAdd struct {
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *UserAddCommand) Synopsis() string {
+func (c *CmdUserAdd) Synopsis() string {
 	return "Create a new user."
 }
 
 // Help returns long-form help text.
-func (c *UserAddCommand) Help() string {
+func (c *CmdUserAdd) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s [-n] address
@@ -41,7 +42,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *UserAddCommand) Run(args []string) int {
+func (c *CmdUserAdd) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
@@ -65,18 +66,18 @@ func (c *UserAddCommand) Run(args []string) int {
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	user, err := mailfull.NewUser(userName, mailfull.NeverMatchHashedPassword, nil)
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	if err := repo.UserCreate(domainName, user); err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
@@ -86,13 +87,13 @@ func (c *UserAddCommand) Run(args []string) int {
 
 	mailData, err := repo.MailData()
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	err = repo.GenerateDatabases(mailData)
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
