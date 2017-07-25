@@ -1,24 +1,25 @@
-package command
+package main
 
 import (
 	"fmt"
 	"sort"
 
-	mailfull "github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
-// AliasDomainsCommand represents a AliasDomainsCommand.
-type AliasDomainsCommand struct {
-	Meta
+// CmdAliasDomains represents a CmdAliasDomains.
+type CmdAliasDomains struct {
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *AliasDomainsCommand) Synopsis() string {
+func (c *CmdAliasDomains) Synopsis() string {
 	return "Show aliasdomains."
 }
 
 // Help returns long-form help text.
-func (c *AliasDomainsCommand) Help() string {
+func (c *CmdAliasDomains) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s [domain]
@@ -37,7 +38,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *AliasDomainsCommand) Run(args []string) int {
+func (c *CmdAliasDomains) Run(args []string) int {
 	if len(args) > 1 {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
@@ -50,16 +51,16 @@ func (c *AliasDomainsCommand) Run(args []string) int {
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	aliasDomains, err := repo.AliasDomains()
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
-	sort.Sort(mailfull.AliasDomainSlice(aliasDomains))
+	sort.Slice(aliasDomains, func(i, j int) bool { return aliasDomains[i].Name() < aliasDomains[j].Name() })
 
 	for _, aliasDomain := range aliasDomains {
 		if targetDomainName != "" {

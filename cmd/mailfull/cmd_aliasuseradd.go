@@ -1,24 +1,25 @@
-package command
+package main
 
 import (
 	"fmt"
 	"strings"
 
-	mailfull "github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
-// AliasUserAddCommand represents a AliasUserAddCommand.
-type AliasUserAddCommand struct {
-	Meta
+// CmdAliasUserAdd represents a CmdAliasUserAdd.
+type CmdAliasUserAdd struct {
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *AliasUserAddCommand) Synopsis() string {
+func (c *CmdAliasUserAdd) Synopsis() string {
 	return "Create a new aliasuser."
 }
 
 // Help returns long-form help text.
-func (c *AliasUserAddCommand) Help() string {
+func (c *CmdAliasUserAdd) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s [-n] address target [target...]
@@ -43,7 +44,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *AliasUserAddCommand) Run(args []string) int {
+func (c *CmdAliasUserAdd) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
@@ -68,34 +69,26 @@ func (c *AliasUserAddCommand) Run(args []string) int {
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	aliasUser, err := mailfull.NewAliasUser(aliasUserName, targets)
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	if err := repo.AliasUserCreate(domainName, aliasUser); err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	if noCommit {
 		return 0
 	}
-
-	mailData, err := repo.MailData()
-	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
-		return 1
-	}
-
-	err = repo.GenerateDatabases(mailData)
-	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+	if err = repo.GenerateDatabases(); err != nil {
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 

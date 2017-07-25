@@ -1,24 +1,25 @@
-package command
+package main
 
 import (
 	"fmt"
 	"strings"
 
 	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
-// UserDelCommand represents a UserDelCommand.
-type UserDelCommand struct {
-	Meta
+// CmdUserAdd represents a CmdUserAdd.
+type CmdUserAdd struct {
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *UserDelCommand) Synopsis() string {
-	return "Delete and backup a user."
+func (c *CmdUserAdd) Synopsis() string {
+	return "Create a new user."
 }
 
 // Help returns long-form help text.
-func (c *UserDelCommand) Help() string {
+func (c *CmdUserAdd) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s [-n] address
@@ -28,7 +29,7 @@ Description:
 
 Required Args:
     address
-        The email address that you want to delete.
+        The email address that you want to create.
 
 Optional Args:
     -n
@@ -41,7 +42,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *UserDelCommand) Run(args []string) int {
+func (c *CmdUserAdd) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
@@ -65,33 +66,26 @@ func (c *UserDelCommand) Run(args []string) int {
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
-	if userName == "postmaster" {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] Cannot delete postmaster.\n")
+	user, err := mailfull.NewUser(userName, mailfull.NeverMatchHashedPassword, nil)
+	if err != nil {
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
-	if err := repo.UserRemove(domainName, userName); err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+	if err := repo.UserCreate(domainName, user); err != nil {
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	if noCommit {
 		return 0
 	}
-
-	mailData, err := repo.MailData()
-	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
-		return 1
-	}
-
-	err = repo.GenerateDatabases(mailData)
-	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+	if err = repo.GenerateDatabases(); err != nil {
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 

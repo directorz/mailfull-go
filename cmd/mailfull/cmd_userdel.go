@@ -1,24 +1,25 @@
-package command
+package main
 
 import (
 	"fmt"
 	"strings"
 
-	mailfull "github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
-// AliasUserDelCommand represents a AliasUserDelCommand.
-type AliasUserDelCommand struct {
-	Meta
+// CmdUserDel represents a CmdUserDel.
+type CmdUserDel struct {
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *AliasUserDelCommand) Synopsis() string {
-	return "Delete a aliasuser."
+func (c *CmdUserDel) Synopsis() string {
+	return "Delete and backup a user."
 }
 
 // Help returns long-form help text.
-func (c *AliasUserDelCommand) Help() string {
+func (c *CmdUserDel) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s [-n] address
@@ -41,7 +42,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *AliasUserDelCommand) Run(args []string) int {
+func (c *CmdUserDel) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
@@ -59,33 +60,31 @@ func (c *AliasUserDelCommand) Run(args []string) int {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
 	}
-	aliasUserName := words[0]
+
+	userName := words[0]
 	domainName := words[1]
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
-	if err := repo.AliasUserRemove(domainName, aliasUserName); err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+	if userName == "postmaster" {
+		c.Meta.Errorf("Cannot delete postmaster.\n")
+		return 1
+	}
+
+	if err := repo.UserRemove(domainName, userName); err != nil {
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	if noCommit {
 		return 0
 	}
-
-	mailData, err := repo.MailData()
-	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
-		return 1
-	}
-
-	err = repo.GenerateDatabases(mailData)
-	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+	if err = repo.GenerateDatabases(); err != nil {
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 

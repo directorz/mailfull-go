@@ -4,12 +4,14 @@ Command mailfull is a CLI application using the mailfull package.
 package main
 
 import (
+	"bytes"
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/directorz/mailfull-go"
-	"github.com/directorz/mailfull-go/cmd/mailfull/command"
+	"github.com/directorz/mailfull-go/cmd"
 	"github.com/mitchellh/cli"
 )
 
@@ -31,7 +33,7 @@ func main() {
 		Args:    os.Args[1:],
 	}
 
-	meta := command.Meta{
+	meta := cmd.Meta{
 		UI: &cli.BasicUi{
 			Reader:      os.Stdin,
 			Writer:      os.Stdout,
@@ -44,95 +46,95 @@ func main() {
 	c.Commands = map[string]cli.CommandFactory{
 		"init": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.InitCommand{Meta: meta}, nil
+			return &CmdInit{Meta: meta}, nil
 		},
 		"genconfig": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.GenConfigCommand{Meta: meta}, nil
+			return &CmdGenConfig{Meta: meta}, nil
 		},
 		"domains": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.DomainsCommand{Meta: meta}, nil
+			return &CmdDomains{Meta: meta}, nil
 		},
 		"domainadd": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.DomainAddCommand{Meta: meta}, nil
+			return &CmdDomainAdd{Meta: meta}, nil
 		},
 		"domaindel": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.DomainDelCommand{Meta: meta}, nil
+			return &CmdDomainDel{Meta: meta}, nil
 		},
 		"domaindisable": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.DomainDisableCommand{Meta: meta}, nil
+			return &CmdDomainDisable{Meta: meta}, nil
 		},
 		"domainenable": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.DomainEnableCommand{Meta: meta}, nil
+			return &CmdDomainEnable{Meta: meta}, nil
 		},
 		"aliasdomains": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.AliasDomainsCommand{Meta: meta}, nil
+			return &CmdAliasDomains{Meta: meta}, nil
 		},
 		"aliasdomainadd": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.AliasDomainAddCommand{Meta: meta}, nil
+			return &CmdAliasDomainAdd{Meta: meta}, nil
 		},
 		"aliasdomaindel": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.AliasDomainDelCommand{Meta: meta}, nil
+			return &CmdAliasDomainDel{Meta: meta}, nil
 		},
 		"users": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.UsersCommand{Meta: meta}, nil
+			return &CmdUsers{Meta: meta}, nil
 		},
 		"useradd": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.UserAddCommand{Meta: meta}, nil
+			return &CmdUserAdd{Meta: meta}, nil
 		},
 		"userdel": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.UserDelCommand{Meta: meta}, nil
+			return &CmdUserDel{Meta: meta}, nil
 		},
 		"userpasswd": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.UserPasswdCommand{Meta: meta}, nil
+			return &CmdUserPasswd{Meta: meta}, nil
 		},
 		"usercheckpw": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.UserCheckPwCommand{Meta: meta}, nil
+			return &CmdUserCheckPw{Meta: meta}, nil
 		},
 		"aliasusers": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.AliasUsersCommand{Meta: meta}, nil
+			return &CmdAliasUsers{Meta: meta}, nil
 		},
 		"aliasuseradd": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.AliasUserAddCommand{Meta: meta}, nil
+			return &CmdAliasUserAdd{Meta: meta}, nil
 		},
 		"aliasusermod": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.AliasUserModCommand{Meta: meta}, nil
+			return &CmdAliasUserMod{Meta: meta}, nil
 		},
 		"aliasuserdel": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.AliasUserDelCommand{Meta: meta}, nil
+			return &CmdAliasUserDel{Meta: meta}, nil
 		},
 		"catchall": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.CatchAllCommand{Meta: meta}, nil
+			return &CmdCatchAll{Meta: meta}, nil
 		},
 		"catchallset": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.CatchAllSetCommand{Meta: meta}, nil
+			return &CmdCatchAllSet{Meta: meta}, nil
 		},
 		"catchallunset": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.CatchAllUnsetCommand{Meta: meta}, nil
+			return &CmdCatchAllUnset{Meta: meta}, nil
 		},
 		"commit": func() (cli.Command, error) {
 			meta.SubCmdName = c.Subcommand()
-			return &command.CommitCommand{Meta: meta}, nil
+			return &CmdCommit{Meta: meta}, nil
 		},
 	}
 
@@ -142,4 +144,18 @@ func main() {
 	}
 
 	os.Exit(exitCode)
+}
+
+// noCommitFlag returns true if `pargs` has "-n" flag.
+// `pargs` is overwrites with non-flag arguments.
+func noCommitFlag(pargs *[]string) (bool, error) {
+	nFlag := false
+
+	flagSet := flag.NewFlagSet("", flag.ContinueOnError)
+	flagSet.SetOutput(&bytes.Buffer{})
+	flagSet.BoolVar(&nFlag, "n", nFlag, "")
+	err := flagSet.Parse(*pargs)
+	*pargs = flagSet.Args()
+
+	return nFlag, err
 }

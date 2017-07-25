@@ -1,23 +1,24 @@
-package command
+package main
 
 import (
 	"fmt"
 
 	"github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go/cmd"
 )
 
-// CatchAllUnsetCommand represents a CatchAllUnsetCommand.
-type CatchAllUnsetCommand struct {
-	Meta
+// CmdDomainDel represents a CmdDomainDel.
+type CmdDomainDel struct {
+	cmd.Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *CatchAllUnsetCommand) Synopsis() string {
-	return "Unset a catchall user."
+func (c *CmdDomainDel) Synopsis() string {
+	return "Delete and backup a domain."
 }
 
 // Help returns long-form help text.
-func (c *CatchAllUnsetCommand) Help() string {
+func (c *CmdDomainDel) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s [-n] domain
@@ -27,7 +28,7 @@ Description:
 
 Required Args:
     domain
-        The domain name.
+        The domain name that you want to delete.
 
 Optional Args:
     -n
@@ -40,7 +41,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *CatchAllUnsetCommand) Run(args []string) int {
+func (c *CmdDomainDel) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
@@ -56,28 +57,20 @@ func (c *CatchAllUnsetCommand) Run(args []string) int {
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
-	if err := repo.CatchAllUserUnset(domainName); err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+	if err := repo.DomainRemove(domainName); err != nil {
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
 	if noCommit {
 		return 0
 	}
-
-	mailData, err := repo.MailData()
-	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
-		return 1
-	}
-
-	err = repo.GenerateDatabases(mailData)
-	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+	if err = repo.GenerateDatabases(); err != nil {
+		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
 
