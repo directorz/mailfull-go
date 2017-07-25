@@ -1,6 +1,9 @@
 GOVERSION=$(shell go version)
-GOOS=$(word 1,$(subst /, ,$(lastword $(GOVERSION))))
-GOARCH=$(word 2,$(subst /, ,$(lastword $(GOVERSION))))
+THIS_GOOS=$(word 1,$(subst /, ,$(lastword $(GOVERSION))))
+THIS_GOARCH=$(word 2,$(subst /, ,$(lastword $(GOVERSION))))
+GOOS?=$(THIS_GOOS)
+GOARCH?=$(THIS_GOARCH)
+DIR_PKG=$(subst /src/github.com/directorz/mailfull-go,/pkg,$(PWD))
 DIR_BUILD=build
 DIR_RELEASE=release
 VERSION=$(patsubst "%",%,$(lastword $(shell grep 'const Version' version.go)))
@@ -9,8 +12,16 @@ VERSION=$(patsubst "%",%,$(lastword $(shell grep 'const Version' version.go)))
 
 default: build
 
-installdeps:
-	glide install -v
+$(DIR_BUILD)/bin/$(THIS_GOOS)_$(THIS_GOARCH)/dep:
+	mkdir -p /tmp/go
+	GOPATH=/tmp/go go get -d -v github.com/golang/dep
+	GOPATH=/tmp/go go build -v -o $(DIR_BUILD)/bin/$(THIS_GOOS)_$(THIS_GOARCH)/dep github.com/golang/dep/cmd/dep
+	rm -rf /tmp/go
+
+dep: $(DIR_BUILD)/bin/$(THIS_GOOS)_$(THIS_GOARCH)/dep
+
+installdeps: dep
+	$(DIR_BUILD)/bin/$(THIS_GOOS)_$(THIS_GOARCH)/dep ensure -v
 
 build:
 	go build -v -ldflags "-X main.gittag=`git rev-parse --short HEAD`" -o build/mailfull_$(GOOS)_$(GOARCH)/mailfull cmd/mailfull/mailfull.go

@@ -1,7 +1,0 @@
-package: github.com/directorz/mailfull-go
-import:
-- package: github.com/BurntSushi/toml
-- package: github.com/jsimonetti/pwscheme
-  subpackages:
-  - ssha
-- package: github.com/mitchellh/cli
