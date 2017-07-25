@@ -1,33 +1,34 @@
-package command
+package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/directorz/mailfull-go"
 )
 
-// DomainAddCommand represents a DomainAddCommand.
-type DomainAddCommand struct {
+// UserDelCommand represents a UserDelCommand.
+type UserDelCommand struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *DomainAddCommand) Synopsis() string {
-	return "Create a new domain and postmaster."
+func (c *UserDelCommand) Synopsis() string {
+	return "Delete and backup a user."
 }
 
 // Help returns long-form help text.
-func (c *DomainAddCommand) Help() string {
+func (c *UserDelCommand) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
-    %s %s [-n] domain
+    %s %s [-n] address
 
 Description:
     %s
 
 Required Args:
-    domain
-        The domain name that you want to create.
+    address
+        The email address that you want to delete.
 
 Optional Args:
     -n
@@ -40,7 +41,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *DomainAddCommand) Run(args []string) int {
+func (c *UserDelCommand) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
@@ -52,7 +53,15 @@ func (c *DomainAddCommand) Run(args []string) int {
 		return 1
 	}
 
-	domainName := args[0]
+	address := args[0]
+	words := strings.Split(address, "@")
+	if len(words) != 2 {
+		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
+		return 1
+	}
+
+	userName := words[0]
+	domainName := words[1]
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
@@ -60,24 +69,12 @@ func (c *DomainAddCommand) Run(args []string) int {
 		return 1
 	}
 
-	domain, err := mailfull.NewDomain(domainName)
-	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+	if userName == "postmaster" {
+		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] Cannot delete postmaster.\n")
 		return 1
 	}
 
-	if err := repo.DomainCreate(domain); err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
-		return 1
-	}
-
-	user, err := mailfull.NewUser("postmaster", mailfull.NeverMatchHashedPassword, nil)
-	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
-		return 1
-	}
-
-	if err := repo.UserCreate(domainName, user); err != nil {
+	if err := repo.UserRemove(domainName, userName); err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
 	}

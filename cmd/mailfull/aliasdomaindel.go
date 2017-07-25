@@ -1,23 +1,23 @@
-package command
+package main
 
 import (
 	"fmt"
 
-	"github.com/directorz/mailfull-go"
+	mailfull "github.com/directorz/mailfull-go"
 )
 
-// DomainDelCommand represents a DomainDelCommand.
-type DomainDelCommand struct {
+// AliasDomainDelCommand represents a AliasDomainDelCommand.
+type AliasDomainDelCommand struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *DomainDelCommand) Synopsis() string {
-	return "Delete and backup a domain."
+func (c *AliasDomainDelCommand) Synopsis() string {
+	return "Delete a aliasdomain."
 }
 
 // Help returns long-form help text.
-func (c *DomainDelCommand) Help() string {
+func (c *AliasDomainDelCommand) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s [-n] domain
@@ -40,7 +40,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *DomainDelCommand) Run(args []string) int {
+func (c *AliasDomainDelCommand) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
@@ -52,7 +52,7 @@ func (c *DomainDelCommand) Run(args []string) int {
 		return 1
 	}
 
-	domainName := args[0]
+	aliasDomainName := args[0]
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
@@ -60,7 +60,7 @@ func (c *DomainDelCommand) Run(args []string) int {
 		return 1
 	}
 
-	if err := repo.DomainRemove(domainName); err != nil {
+	if err := repo.AliasDomainRemove(aliasDomainName); err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
 	}

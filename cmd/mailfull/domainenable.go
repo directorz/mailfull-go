@@ -1,36 +1,33 @@
-package command
+package main
 
 import (
 	"fmt"
-	"strings"
 
-	mailfull "github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go"
 )
 
-// AliasUserModCommand represents a AliasUserModCommand.
-type AliasUserModCommand struct {
+// DomainEnableCommand represents a DomainEnableCommand.
+type DomainEnableCommand struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *AliasUserModCommand) Synopsis() string {
-	return "Modify a aliasuser."
+func (c *DomainEnableCommand) Synopsis() string {
+	return "Enable a domain."
 }
 
 // Help returns long-form help text.
-func (c *AliasUserModCommand) Help() string {
+func (c *DomainEnableCommand) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
-    %s %s [-n] address target [target...]
+    %s %s [-n] domain
 
 Description:
     %s
 
 Required Args:
-    address
-        The email address that you want to modify.
-    target
-        Target email addresses.
+    domain
+        The domain name that you want to enable.
 
 Optional Args:
     -n
@@ -43,28 +40,19 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *AliasUserModCommand) Run(args []string) int {
+func (c *DomainEnableCommand) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
 	}
 
-	if len(args) < 2 {
+	if len(args) != 1 {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
 	}
 
-	address := args[0]
-	targets := args[1:]
-
-	words := strings.Split(address, "@")
-	if len(words) != 2 {
-		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
-		return 1
-	}
-	aliasUserName := words[0]
-	domainName := words[1]
+	domainName := args[0]
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
@@ -72,22 +60,19 @@ func (c *AliasUserModCommand) Run(args []string) int {
 		return 1
 	}
 
-	aliasUser, err := repo.AliasUser(domainName, aliasUserName)
+	domain, err := repo.Domain(domainName)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
 	}
-	if aliasUser == nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", mailfull.ErrAliasUserNotExist)
+	if domain == nil {
+		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", mailfull.ErrDomainNotExist)
 		return 1
 	}
 
-	if err := aliasUser.SetTargets(targets); err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
-		return 1
-	}
+	domain.SetDisabled(false)
 
-	if err := repo.AliasUserUpdate(domainName, aliasUser); err != nil {
+	if err := repo.DomainUpdate(domain); err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
 	}

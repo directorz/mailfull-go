@@ -1,33 +1,35 @@
-package command
+package main
 
 import (
 	"fmt"
 
-	mailfull "github.com/directorz/mailfull-go"
+	"github.com/directorz/mailfull-go"
 )
 
-// AliasDomainDelCommand represents a AliasDomainDelCommand.
-type AliasDomainDelCommand struct {
+// CatchAllSetCommand represents a CatchAllSetCommand.
+type CatchAllSetCommand struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *AliasDomainDelCommand) Synopsis() string {
-	return "Delete a aliasdomain."
+func (c *CatchAllSetCommand) Synopsis() string {
+	return "Set a catchall user."
 }
 
 // Help returns long-form help text.
-func (c *AliasDomainDelCommand) Help() string {
+func (c *CatchAllSetCommand) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
-    %s %s [-n] domain
+    %s %s [-n] domain user
 
 Description:
     %s
 
 Required Args:
     domain
-        The domain name that you want to delete.
+        The domain name.
+    user
+        The user name that you want to set as catchall user.
 
 Optional Args:
     -n
@@ -40,19 +42,20 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *AliasDomainDelCommand) Run(args []string) int {
+func (c *CatchAllSetCommand) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
 	}
 
-	if len(args) != 1 {
+	if len(args) != 2 {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
 	}
 
-	aliasDomainName := args[0]
+	domainName := args[0]
+	userName := args[1]
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
@@ -60,7 +63,13 @@ func (c *AliasDomainDelCommand) Run(args []string) int {
 		return 1
 	}
 
-	if err := repo.AliasDomainRemove(aliasDomainName); err != nil {
+	catchAllUser, err := mailfull.NewCatchAllUser(userName)
+	if err != nil {
+		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		return 1
+	}
+
+	if err := repo.CatchAllUserSet(domainName, catchAllUser); err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
 	}

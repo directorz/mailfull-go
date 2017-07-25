@@ -1,35 +1,36 @@
-package command
+package main
 
 import (
 	"fmt"
+	"strings"
 
-	"github.com/directorz/mailfull-go"
+	mailfull "github.com/directorz/mailfull-go"
 )
 
-// CatchAllSetCommand represents a CatchAllSetCommand.
-type CatchAllSetCommand struct {
+// AliasUserAddCommand represents a AliasUserAddCommand.
+type AliasUserAddCommand struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *CatchAllSetCommand) Synopsis() string {
-	return "Set a catchall user."
+func (c *AliasUserAddCommand) Synopsis() string {
+	return "Create a new aliasuser."
 }
 
 // Help returns long-form help text.
-func (c *CatchAllSetCommand) Help() string {
+func (c *AliasUserAddCommand) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
-    %s %s [-n] domain user
+    %s %s [-n] address target [target...]
 
 Description:
     %s
 
 Required Args:
-    domain
-        The domain name.
-    user
-        The user name that you want to set as catchall user.
+    address
+        The email address that you want to create.
+    target
+        Target email addresses.
 
 Optional Args:
     -n
@@ -42,20 +43,28 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *CatchAllSetCommand) Run(args []string) int {
+func (c *AliasUserAddCommand) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
 	}
 
-	if len(args) != 2 {
+	if len(args) < 2 {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
 	}
 
-	domainName := args[0]
-	userName := args[1]
+	address := args[0]
+	targets := args[1:]
+
+	words := strings.Split(address, "@")
+	if len(words) != 2 {
+		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
+		return 1
+	}
+	aliasUserName := words[0]
+	domainName := words[1]
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
@@ -63,13 +72,13 @@ func (c *CatchAllSetCommand) Run(args []string) int {
 		return 1
 	}
 
-	catchAllUser, err := mailfull.NewCatchAllUser(userName)
+	aliasUser, err := mailfull.NewAliasUser(aliasUserName, targets)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
 	}
 
-	if err := repo.CatchAllUserSet(domainName, catchAllUser); err != nil {
+	if err := repo.AliasUserCreate(domainName, aliasUser); err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
 	}

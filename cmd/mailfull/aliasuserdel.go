@@ -1,4 +1,4 @@
-package command
+package main
 
 import (
 	"fmt"
@@ -7,30 +7,28 @@ import (
 	mailfull "github.com/directorz/mailfull-go"
 )
 
-// AliasUserAddCommand represents a AliasUserAddCommand.
-type AliasUserAddCommand struct {
+// AliasUserDelCommand represents a AliasUserDelCommand.
+type AliasUserDelCommand struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *AliasUserAddCommand) Synopsis() string {
-	return "Create a new aliasuser."
+func (c *AliasUserDelCommand) Synopsis() string {
+	return "Delete a aliasuser."
 }
 
 // Help returns long-form help text.
-func (c *AliasUserAddCommand) Help() string {
+func (c *AliasUserDelCommand) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
-    %s %s [-n] address target [target...]
+    %s %s [-n] address
 
 Description:
     %s
 
 Required Args:
     address
-        The email address that you want to create.
-    target
-        Target email addresses.
+        The email address that you want to delete.
 
 Optional Args:
     -n
@@ -43,21 +41,19 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *AliasUserAddCommand) Run(args []string) int {
+func (c *AliasUserDelCommand) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
 	}
 
-	if len(args) < 2 {
+	if len(args) != 1 {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
 	}
 
 	address := args[0]
-	targets := args[1:]
-
 	words := strings.Split(address, "@")
 	if len(words) != 2 {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
@@ -72,13 +68,7 @@ func (c *AliasUserAddCommand) Run(args []string) int {
 		return 1
 	}
 
-	aliasUser, err := mailfull.NewAliasUser(aliasUserName, targets)
-	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
-		return 1
-	}
-
-	if err := repo.AliasUserCreate(domainName, aliasUser); err != nil {
+	if err := repo.AliasUserRemove(domainName, aliasUserName); err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
 	}

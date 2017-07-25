@@ -1,34 +1,33 @@
-package command
+package main
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/directorz/mailfull-go"
 )
 
-// UserAddCommand represents a UserAddCommand.
-type UserAddCommand struct {
+// DomainDisableCommand represents a DomainDisableCommand.
+type DomainDisableCommand struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *UserAddCommand) Synopsis() string {
-	return "Create a new user."
+func (c *DomainDisableCommand) Synopsis() string {
+	return "Disable a domain temporarily."
 }
 
 // Help returns long-form help text.
-func (c *UserAddCommand) Help() string {
+func (c *DomainDisableCommand) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
-    %s %s [-n] address
+    %s %s [-n] domain
 
 Description:
     %s
 
 Required Args:
-    address
-        The email address that you want to create.
+    domain
+        The domain name that you want to disable.
 
 Optional Args:
     -n
@@ -41,7 +40,7 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *UserAddCommand) Run(args []string) int {
+func (c *DomainDisableCommand) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
@@ -53,15 +52,7 @@ func (c *UserAddCommand) Run(args []string) int {
 		return 1
 	}
 
-	address := args[0]
-	words := strings.Split(address, "@")
-	if len(words) != 2 {
-		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
-		return 1
-	}
-
-	userName := words[0]
-	domainName := words[1]
+	domainName := args[0]
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
@@ -69,13 +60,19 @@ func (c *UserAddCommand) Run(args []string) int {
 		return 1
 	}
 
-	user, err := mailfull.NewUser(userName, mailfull.NeverMatchHashedPassword, nil)
+	domain, err := repo.Domain(domainName)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
 	}
+	if domain == nil {
+		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", mailfull.ErrDomainNotExist)
+		return 1
+	}
 
-	if err := repo.UserCreate(domainName, user); err != nil {
+	domain.SetDisabled(true)
+
+	if err := repo.DomainUpdate(domain); err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
 	}

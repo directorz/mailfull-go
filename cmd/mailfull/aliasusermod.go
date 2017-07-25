@@ -1,34 +1,36 @@
-package command
+package main
 
 import (
 	"fmt"
 	"strings"
 
-	"github.com/directorz/mailfull-go"
+	mailfull "github.com/directorz/mailfull-go"
 )
 
-// UserDelCommand represents a UserDelCommand.
-type UserDelCommand struct {
+// AliasUserModCommand represents a AliasUserModCommand.
+type AliasUserModCommand struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *UserDelCommand) Synopsis() string {
-	return "Delete and backup a user."
+func (c *AliasUserModCommand) Synopsis() string {
+	return "Modify a aliasuser."
 }
 
 // Help returns long-form help text.
-func (c *UserDelCommand) Help() string {
+func (c *AliasUserModCommand) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
-    %s %s [-n] address
+    %s %s [-n] address target [target...]
 
 Description:
     %s
 
 Required Args:
     address
-        The email address that you want to delete.
+        The email address that you want to modify.
+    target
+        Target email addresses.
 
 Optional Args:
     -n
@@ -41,26 +43,27 @@ Optional Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *UserDelCommand) Run(args []string) int {
+func (c *AliasUserModCommand) Run(args []string) int {
 	noCommit, err := noCommitFlag(&args)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
 	}
 
-	if len(args) != 1 {
+	if len(args) < 2 {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
 	}
 
 	address := args[0]
+	targets := args[1:]
+
 	words := strings.Split(address, "@")
 	if len(words) != 2 {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
 	}
-
-	userName := words[0]
+	aliasUserName := words[0]
 	domainName := words[1]
 
 	repo, err := mailfull.OpenRepository(".")
@@ -69,12 +72,22 @@ func (c *UserDelCommand) Run(args []string) int {
 		return 1
 	}
 
-	if userName == "postmaster" {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] Cannot delete postmaster.\n")
+	aliasUser, err := repo.AliasUser(domainName, aliasUserName)
+	if err != nil {
+		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		return 1
+	}
+	if aliasUser == nil {
+		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", mailfull.ErrAliasUserNotExist)
 		return 1
 	}
 
-	if err := repo.UserRemove(domainName, userName); err != nil {
+	if err := aliasUser.SetTargets(targets); err != nil {
+		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
+		return 1
+	}
+
+	if err := repo.AliasUserUpdate(domainName, aliasUser); err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
 	}

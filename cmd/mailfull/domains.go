@@ -1,29 +1,31 @@
-package command
+package main
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/directorz/mailfull-go"
 )
 
-// CommitCommand represents a CommitCommand.
-type CommitCommand struct {
+// DomainsCommand represents a DomainsCommand.
+type DomainsCommand struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *CommitCommand) Synopsis() string {
-	return "Create databases from the structure of the MailData directory."
+func (c *DomainsCommand) Synopsis() string {
+	return "Show domains."
 }
 
 // Help returns long-form help text.
-func (c *CommitCommand) Help() string {
+func (c *DomainsCommand) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s
 
 Description:
     %s
+    Disabled domains are marked "!" the beginning.
 `,
 		c.CmdName, c.SubCmdName,
 		c.Synopsis())
@@ -32,23 +34,27 @@ Description:
 }
 
 // Run runs the command and returns the exit status.
-func (c *CommitCommand) Run(args []string) int {
+func (c *DomainsCommand) Run(args []string) int {
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
 	}
 
-	mailData, err := repo.MailData()
+	domains, err := repo.Domains()
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
 	}
+	sort.Sort(mailfull.DomainSlice(domains))
 
-	err = repo.GenerateDatabases(mailData)
-	if err != nil {
-		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
-		return 1
+	for _, domain := range domains {
+		disableStr := ""
+		if domain.Disabled() {
+			disableStr = "!"
+		}
+
+		fmt.Fprintf(c.UI.Writer, "%s%s\n", disableStr, domain.Name())
 	}
 
 	return 0

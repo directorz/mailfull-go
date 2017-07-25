@@ -1,24 +1,23 @@
-package command
+package main
 
 import (
 	"fmt"
-	"sort"
 
 	"github.com/directorz/mailfull-go"
 )
 
-// AliasUsersCommand represents a AliasUsersCommand.
-type AliasUsersCommand struct {
+// CatchAllCommand represents a CatchAllCommand.
+type CatchAllCommand struct {
 	Meta
 }
 
 // Synopsis returns a one-line synopsis.
-func (c *AliasUsersCommand) Synopsis() string {
-	return "Show aliasusers."
+func (c *CatchAllCommand) Synopsis() string {
+	return "Show a catchall user."
 }
 
 // Help returns long-form help text.
-func (c *AliasUsersCommand) Help() string {
+func (c *CatchAllCommand) Help() string {
 	txt := fmt.Sprintf(`
 Usage:
     %s %s domain
@@ -37,13 +36,13 @@ Required Args:
 }
 
 // Run runs the command and returns the exit status.
-func (c *AliasUsersCommand) Run(args []string) int {
+func (c *CatchAllCommand) Run(args []string) int {
 	if len(args) != 1 {
 		fmt.Fprintf(c.UI.ErrorWriter, "%v\n", c.Help())
 		return 1
 	}
 
-	targetDomainName := args[0]
+	domainName := args[0]
 
 	repo, err := mailfull.OpenRepository(".")
 	if err != nil {
@@ -51,15 +50,14 @@ func (c *AliasUsersCommand) Run(args []string) int {
 		return 1
 	}
 
-	aliasUsers, err := repo.AliasUsers(targetDomainName)
+	catchAllUser, err := repo.CatchAllUser(domainName)
 	if err != nil {
 		fmt.Fprintf(c.UI.ErrorWriter, "[ERR] %v\n", err)
 		return 1
 	}
-	sort.Sort(mailfull.AliasUserSlice(aliasUsers))
 
-	for _, aliasUser := range aliasUsers {
-		fmt.Fprintf(c.UI.Writer, "%s\n", aliasUser.Name())
+	if catchAllUser != nil {
+		fmt.Fprintf(c.UI.Writer, "%s\n", catchAllUser.Name())
 	}
 
 	return 0
