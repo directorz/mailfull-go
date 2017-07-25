@@ -60,7 +60,7 @@ func (c *CmdAliasDomains) Run(args []string) int {
 		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
-	sort.Sort(mailfull.AliasDomainSlice(aliasDomains))
+	sort.Slice(aliasDomains, func(i, j int) bool { return aliasDomains[i].Name() < aliasDomains[j].Name() })
 
 	for _, aliasDomain := range aliasDomains {
 		if targetDomainName != "" {

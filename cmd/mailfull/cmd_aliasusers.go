@@ -57,7 +57,7 @@ func (c *CmdAliasUsers) Run(args []string) int {
 		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
-	sort.Sort(mailfull.AliasUserSlice(aliasUsers))
+	sort.Slice(aliasUsers, func(i, j int) bool { return aliasUsers[i].Name() < aliasUsers[j].Name() })
 
 	for _, aliasUser := range aliasUsers {
 		fmt.Fprintf(c.UI.Writer, "%s\n", aliasUser.Name())

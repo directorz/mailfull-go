@@ -21,13 +21,6 @@ type AliasUser struct {
 	targets []string
 }
 
-// AliasUserSlice attaches the methods of sort.Interface to []*AliasUser.
-type AliasUserSlice []*AliasUser
-
-func (p AliasUserSlice) Len() int           { return len(p) }
-func (p AliasUserSlice) Less(i, j int) bool { return p[i].Name() < p[j].Name() }
-func (p AliasUserSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
-
 // NewAliasUser creates a new AliasUser instance.
 func NewAliasUser(name string, targets []string) (*AliasUser, error) {
 	au := &AliasUser{}
@@ -233,7 +226,7 @@ func (r *Repository) writeAliasUsersFile(domainName string, aliasUsers []*AliasU
 	}
 	defer file.Close()
 
-	sort.Sort(AliasUserSlice(aliasUsers))
+	sort.Slice(aliasUsers, func(i, j int) bool { return aliasUsers[i].Name() < aliasUsers[j].Name() })
 
 	for _, aliasUser := range aliasUsers {
 		if _, err := fmt.Fprintf(file, "%s:%s\n", aliasUser.Name(), strings.Join(aliasUser.Targets(), ",")); err != nil {

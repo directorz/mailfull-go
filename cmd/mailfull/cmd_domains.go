@@ -47,7 +47,7 @@ func (c *CmdDomains) Run(args []string) int {
 		c.Meta.Errorf("%v\n", err)
 		return 1
 	}
-	sort.Sort(mailfull.DomainSlice(domains))
+	sort.Slice(domains, func(i, j int) bool { return domains[i].Name() < domains[j].Name() })
 
 	for _, domain := range domains {
 		disableStr := ""

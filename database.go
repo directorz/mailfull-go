@@ -11,12 +11,12 @@ import (
 
 // GenerateDatabases generates databases from the MailData directory.
 func (r *Repository) GenerateDatabases(md *MailData) error {
-	sort.Sort(DomainSlice(md.Domains))
-	sort.Sort(AliasDomainSlice(md.AliasDomains))
+	sort.Slice(md.Domains, func(i, j int) bool { return md.Domains[i].Name() < md.Domains[j].Name() })
+	sort.Slice(md.AliasDomains, func(i, j int) bool { return md.AliasDomains[i].Name() < md.AliasDomains[j].Name() })
 
 	for _, domain := range md.Domains {
-		sort.Sort(UserSlice(domain.Users))
-		sort.Sort(AliasUserSlice(domain.AliasUsers))
+		sort.Slice(domain.Users, func(i, j int) bool { return domain.Users[i].Name() < domain.Users[j].Name() })
+		sort.Slice(domain.AliasUsers, func(i, j int) bool { return domain.AliasUsers[i].Name() < domain.AliasUsers[j].Name() })
 	}
 
 	// Generate files
