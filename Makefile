@@ -22,7 +22,7 @@ $(DIR_BUILD)/bin/$(THIS_GOOS)_$(THIS_GOARCH)/dep:
 dep: $(DIR_BUILD)/bin/$(THIS_GOOS)_$(THIS_GOARCH)/dep
 
 installdeps: dep
-	$(DIR_BUILD)/bin/$(THIS_GOOS)_$(THIS_GOARCH)/dep ensure -v
+	$(DIR_BUILD)/bin/$(THIS_GOOS)_$(THIS_GOARCH)/dep ensure -v -vendor-only
 
 build:
 	go build -v -i -ldflags "-X main.gittag=$(GITTAG)" -o $(DIR_BUILD)/mailfull_$(GOOS)_$(GOARCH)/mailfull cmd/mailfull/*.go
