@@ -29,7 +29,7 @@ build:
 
 .build-docker:
 	docker run --rm -v $(DIR_PKG):/go/pkg -v $(PWD):/go/src/github.com/directorz/mailfull-go -w /go/src/github.com/directorz/mailfull-go \
-	-e GOOS=$(GOOS) -e GOARCH=$(GOARCH) golang:1.8.3 \
+	-e GOOS=$(GOOS) -e GOARCH=$(GOARCH) golang:1.9.2 \
 	go build -v -i -ldflags "-X main.gittag=$(GITTAG)" -o $(DIR_BUILD)/mailfull_$(GOOS)_$(GOARCH)/mailfull cmd/mailfull/*.go
 
 build-linux-amd64:
