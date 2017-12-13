@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/directorz/mailfull-go"
 	"github.com/directorz/mailfull-go/cmd"
@@ -22,8 +23,9 @@ var (
 
 func init() {
 	if gittag != "" {
-		version = version + "-" + gittag
+		version += "-" + gittag
 	}
+	version += fmt.Sprintf(" (built with %s)", runtime.Version())
 }
 
 func main() {
