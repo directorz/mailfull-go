@@ -33,20 +33,20 @@ func validAliasDomainTarget(target string) bool {
 
 // validUserName returns true if the input is correct format.
 func validUserName(name string) bool {
-	return regexp.MustCompile(`^[^\s@]+$`).MatchString(name)
+	return regexp.MustCompile(`^[^\.\s@][^\s@]+$`).MatchString(name)
 }
 
 // validAliasUserName returns true if the input is correct format.
 func validAliasUserName(name string) bool {
-	return regexp.MustCompile(`^[^\s@]+$`).MatchString(name)
+	return regexp.MustCompile(`^[^\.\s@][^\s@]+$`).MatchString(name)
 }
 
 // validAliasUserTarget returns true if the input is correct format.
 func validAliasUserTarget(target string) bool {
-	return regexp.MustCompile(`^[^\s@]+@([A-Za-z0-9\-]+\.)*[A-Za-z]+$`).MatchString(target)
+	return regexp.MustCompile(`^[^\.\s@][^\s@]+@([A-Za-z0-9\-]+\.)*[A-Za-z]+$`).MatchString(target)
 }
 
 // validCatchAllUserName returns true if the input is correct format.
 func validCatchAllUserName(name string) bool {
-	return regexp.MustCompile(`^[^\s@]+$`).MatchString(name)
+	return regexp.MustCompile(`^[^\.\s@][^\s@]+$`).MatchString(name)
 }

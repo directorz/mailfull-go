@@ -47,19 +47,24 @@
   branch = "master"
   name = "github.com/mitchellh/cli"
   packages = ["."]
-  revision = "33edc47170b5df54d2588696d590c5e20ee583fe"
+  revision = "518dc677a1e1222682f4e7db06721942cb8e9e4c"
 
 [[projects]]
   name = "github.com/posener/complete"
-  packages = [".","cmd","cmd/install","match"]
-  revision = "dc2bc5a81accba8782bebea28628224643a8286a"
-  version = "v1.1"
+  packages = [
+    ".",
+    "cmd",
+    "cmd/install",
+    "match"
+  ]
+  revision = "98eb9847f27ba2008d380a32c98be474dea55bdf"
+  version = "v1.1.1"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "53aa286056ef226755cd898109dbcdaba8ac0b81"
+  revision = "cc7307a45468e49eaf2997c890f14aa03a26917b"
 
 [solve-meta]
   analyzer-name = "dep"
