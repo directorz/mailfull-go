@@ -26,12 +26,12 @@ installdeps: dep
 	$(DIR_BUILD)/bin/$(THIS_GOOS)_$(THIS_GOARCH)/dep ensure -v -vendor-only
 
 build: FORCE
-	go build -v -i -ldflags "-X main.gittag=$(GITTAG)" -o $(DIR_BUILD)/mailfull_$(GOOS)_$(GOARCH)/mailfull cmd/mailfull/*.go
+	go build -v -ldflags "-X main.gittag=$(GITTAG)" -o $(DIR_BUILD)/mailfull_$(GOOS)_$(GOARCH)/mailfull cmd/mailfull/*.go
 
 .build-docker:
 	docker run --rm -v $(DIR_PKG):/go/pkg -v $(PWD):/go/src/github.com/directorz/mailfull-go -w /go/src/github.com/directorz/mailfull-go \
-	-e GOOS=$(GOOS) -e GOARCH=$(GOARCH) golang:1.9.2 \
-	go build -v -i -ldflags "-X main.gittag=$(GITTAG)" -o $(DIR_BUILD)/mailfull_$(GOOS)_$(GOARCH)/mailfull cmd/mailfull/*.go
+	-e GOOS=$(GOOS) -e GOARCH=$(GOARCH) golang:1.10 \
+	go build -v -ldflags "-X main.gittag=$(GITTAG)" -o $(DIR_BUILD)/mailfull_$(GOOS)_$(GOARCH)/mailfull cmd/mailfull/*.go
 
 build-linux-amd64:
 	@$(MAKE) .build-docker GOOS=linux GOARCH=amd64
