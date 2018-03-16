@@ -100,6 +100,9 @@ func (r *Repository) Users(domainName string) ([]*User, error) {
 
 		forwards, err := r.userForwards(domainName, name)
 		if err != nil {
+			if err == ErrInvalidUserName {
+				continue
+			}
 			return nil, err
 		}
 
