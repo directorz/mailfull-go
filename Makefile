@@ -9,9 +9,10 @@ DIR_RELEASE=release
 VERSION=$(patsubst "%",%,$(lastword $(shell grep 'const Version' version.go)))
 GITTAG=$(shell git rev-parse --short HEAD)
 
-.PHONY: build build-linux-amd64 build-linux-386 clean
-
 default: build
+
+FORCE:
+.PHONY: FORCE
 
 $(DIR_BUILD)/bin/$(THIS_GOOS)_$(THIS_GOARCH)/dep:
 	mkdir -p /tmp/go
@@ -24,7 +25,7 @@ dep: $(DIR_BUILD)/bin/$(THIS_GOOS)_$(THIS_GOARCH)/dep
 installdeps: dep
 	$(DIR_BUILD)/bin/$(THIS_GOOS)_$(THIS_GOARCH)/dep ensure -v -vendor-only
 
-build:
+build: FORCE
 	go build -v -i -ldflags "-X main.gittag=$(GITTAG)" -o $(DIR_BUILD)/mailfull_$(GOOS)_$(GOARCH)/mailfull cmd/mailfull/*.go
 
 .build-docker:
