@@ -22,8 +22,17 @@ $(DIR_BUILD)/bin/$(THIS_GOOS)_$(THIS_GOARCH)/dep:
 
 dep: $(DIR_BUILD)/bin/$(THIS_GOOS)_$(THIS_GOARCH)/dep
 
+$(DIR_BUILD)/bin/$(THIS_GOOS)_$(THIS_GOARCH)/ghr:
+	mkdir -p /tmp/go
+	GOPATH=/tmp/go go get -d -v github.com/tcnksm/ghr
+	GOPATH=/tmp/go go build -v -o $(DIR_BUILD)/bin/$(THIS_GOOS)_$(THIS_GOARCH)/ghr github.com/tcnksm/ghr
+	rm -rf /tmp/go
+
+ghr: $(DIR_BUILD)/bin/$(THIS_GOOS)_$(THIS_GOARCH)/ghr
+
 installdeps: dep
 	$(DIR_BUILD)/bin/$(THIS_GOOS)_$(THIS_GOARCH)/dep ensure -v -vendor-only
+
 
 build: FORCE
 	go build -v -ldflags "-X main.gittag=$(GITTAG)" -o $(DIR_BUILD)/mailfull_$(GOOS)_$(GOARCH)/mailfull cmd/mailfull/*.go
@@ -38,6 +47,7 @@ build-linux-amd64:
 
 build-linux-386:
 	@$(MAKE) .build-docker GOOS=linux GOARCH=386
+
 
 release: release-linux-amd64 release-linux-386
 
@@ -56,11 +66,12 @@ release-targz: dir-$(DIR_RELEASE)
 dir-$(DIR_RELEASE):
 	mkdir -p $(DIR_RELEASE)
 
-release-upload: release-linux-amd64 release-linux-386 release-github-token
-	ghr -u directorz -r mailfull-go -t $(shell cat github_token) --replace --draft $(VERSION) $(DIR_RELEASE)
+release-upload: ghr release-linux-amd64 release-linux-386 release-github-token
+	$(DIR_BUILD)/bin/$(THIS_GOOS)_$(THIS_GOARCH)/ghr -u directorz -r mailfull-go -t $(shell cat github_token) --replace --draft $(VERSION) $(DIR_RELEASE)
 
 release-github-token: github_token
 	@echo "file \"github_token\" is required"
+
 
 clean:
 	-rm -rf $(DIR_BUILD)
