@@ -41,6 +41,8 @@ Create a new user for Mailfull.
 
 Initialize a directory as a Mailfull repository.
 
+- NOTE: Postfix and Dovecot need read access to files under /path/to/repo/etc.
+
 ```
 $ mkdir /path/to/repo && cd /path/to/repo
 $ mailfull init
